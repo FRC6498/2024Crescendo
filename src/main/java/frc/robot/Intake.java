@@ -12,10 +12,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
-  /** Creates a new Intake. */
   CANSparkMax intakeMotor;
   public Intake() {
-    intakeMotor = new CANSparkMax(14, MotorType.kBrushless);
+    intakeMotor = new CANSparkMax(16, MotorType.kBrushless);
     intakeMotor.setIdleMode(IdleMode.kBrake);
   }
   public Command run(double percent) {
