@@ -2,9 +2,8 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot;
+package frc.robot.subsystems;
 
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
 
@@ -17,9 +16,7 @@ public class Shooter extends SubsystemBase {
   CANSparkMax topMotor, bottomMotor;
   public Shooter() {
     topMotor = new CANSparkMax(14, MotorType.kBrushless);
-    bottomMotor = new CANSparkMax(15, MotorType.kBrushless);
-    Slot0Configs configs = new Slot0Configs();
-    
+    bottomMotor = new CANSparkMax(15, MotorType.kBrushless);    
   }
   public Command RunAtVelocity(double topMotorVelocity, double bottomMotorVelocity){
     return this.runOnce(()->
