@@ -28,7 +28,7 @@ public class Telemetry {
      * @param maxSpeed Maximum speed in meters per second
      */
     public Telemetry() {
-        MaxSpeed = DriveConstants.maxSpeed.in(MetersPerSecond);
+      MaxSpeed = DriveConstants.maxSpeed.in(MetersPerSecond);
     }
 
     /* What to publish over networktables for telemetry */

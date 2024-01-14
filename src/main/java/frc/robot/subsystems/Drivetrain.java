@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Telemetry;
 import frc.robot.Constants.DriveConstants;
+import frc.robot.generated.CommandSwerveDrivetrain;
 import frc.robot.generated.TunerConstants;
 
 public class Drivetrain extends SubsystemBase {
@@ -52,8 +53,17 @@ public class Drivetrain extends SubsystemBase {
     return runOnce(() -> swerve.setControl(brake));
   }
 
+  public Pose2d getRobotPose2d() {
+    return swerve.getState().Pose;
+  }
+
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    
   }
 }

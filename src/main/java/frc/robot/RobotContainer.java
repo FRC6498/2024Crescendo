@@ -7,6 +7,7 @@ package frc.robot;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,6 +29,7 @@ public class RobotContainer {
   private final Intake intakeSub = new Intake();
   private final Shooter shooterSub = new Shooter();
   private final Drivetrain driveSub = new Drivetrain(logger);
+  private final Vision vision = new Vision(driveSub::getRobotPose2d);
 
   private void configureBindings() {
     driveSub.setDefaultCommand(driveSub.driveFieldRelative(driveController::getLeftY, driveController::getLeftX, driveController::getRightX));
@@ -43,9 +45,14 @@ public class RobotContainer {
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();
+    DriverStation.silenceJoystickConnectionWarning(true);
   }
 
   public Command getAutonomousCommand() {
    return autoChooser.getSelected();
+  }
+
+  public void runPeriodics() {
+    vision.periodic();
   }
 }
