@@ -1,0 +1,103 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.7606160666866788,
+      "y": 6.763340799408873
+    },
+    "rotation": 61.07357416474636
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootSpeakerCommand"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightStartToFarMidRing"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeCommand"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "FarMidRingToRightStart"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootSpeakerCommand"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightToRingBehind"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeCommand"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LeftRingToLeft"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootSpeakerCommand"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        }
+      ]
+    }
+  },
+  "folder": "3 Ring Autos",
+  "choreoAuto": false
+}

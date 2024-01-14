@@ -1,0 +1,91 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.7512873207564597,
+      "y": 4.365853095342555
+    },
+    "rotation": -59.03624346792648
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootSpeakerCommand"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LeftStartToCloseMidRing"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeCommand"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CloseMidToLeftStart"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootSpeakerCommand"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LeftToRingBehind"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeCommand"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RightRingToRight"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "3 Ring Autos",
+  "choreoAuto": false
+}

@@ -5,14 +5,12 @@
 package frc.robot;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.GravityTypeValue;
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkMax;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class Shooter extends SubsystemBase {
   /** Creates a new Shooter. */
@@ -41,6 +39,15 @@ public class Shooter extends SubsystemBase {
     return this.runOnce(()->
       topMotor.set(percent)).andThen(()->bottomMotor.set(percent)
     );
+  }
+  public Command ShootSpeaker() {
+    return RunAtPercent(50).andThen(new WaitCommand(1)).andThen(stop());
+  }
+  public Command stop() {
+    return this.runOnce(()->RunAtPercent(0));
+  }
+  public Command waitCommand(double seconds) {
+    return new WaitCommand(seconds);
   }
   
 
