@@ -14,8 +14,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Shooter extends SubsystemBase {
   /** Creates a new Shooter. */
-  CANSparkMax topMotor, bottomMotor;
-  SparkPIDController topPID, bottomPID;
+  private final CANSparkMax topMotor, bottomMotor;
+  private final SparkPIDController topPID, bottomPID;
+  private double topMotorCurrentVelocity, bottomMotorCurrentVelocity;
+  
   public Shooter() {
     topMotor = new CANSparkMax(14, MotorType.kBrushless);
     bottomMotor = new CANSparkMax(15, MotorType.kBrushless);
@@ -64,6 +66,7 @@ public class Shooter extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    topMotorCurrentVelocity = topMotor.getEncoder().getVelocity();
+    bottomMotorCurrentVelocity = topMotor.getEncoder().getVelocity();
   }
 }

@@ -10,15 +10,38 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
   CANSparkMax intakeMotor;
   public Intake() {
     intakeMotor = new CANSparkMax(16, MotorType.kBrushless);
     intakeMotor.setIdleMode(IdleMode.kBrake);
+    intakeMotor.setInverted(true);
   }
-  public Command run(double percent) {
+  public Command runAtPrecent(double percent) {
     return this.runOnce(()->intakeMotor.set(percent));
+  }
+  /**
+   * Runs the intake at default speed in the forward direction
+   * @return
+   */
+  public Command Run() {
+    return runAtPrecent(IntakeConstants.DEFAULT_INTAKE_SPEED);
+  }
+  /**
+   * Runs the intake at default speed in the reverse direction
+   * @return
+   */
+  public Command Reverse() {
+    return runAtPrecent(-IntakeConstants.DEFAULT_INTAKE_SPEED);
+  }
+  /**
+   * Stops the intake
+   * @return
+   */
+  public Command stop() {
+    return runAtPrecent(0);
   }
 
   @Override
