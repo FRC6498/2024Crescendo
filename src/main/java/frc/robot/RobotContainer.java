@@ -5,11 +5,10 @@
 package frc.robot;
 
 import com.ctre.phoenix6.Utils;
-import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -17,8 +16,6 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.generated.TunerConstants;
@@ -51,10 +48,19 @@ public class RobotContainer {
             .withRotationalRate(-driveController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
 
-    driveController.a().whileTrue(drivetrain.applyRequest(() -> brake));
-    driveController.b().whileTrue(drivetrain
-        .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driveController.getLeftY(), -driveController.getLeftX()))));
-    driveController.x().whileTrue(intakeSub.run(-.75)).whileFalse(intakeSub.run(0));
+    driveController.rightBumper().whileTrue(drivetrain.applyRequest(() -> brake));
+    driveController.leftBumper().whileTrue(
+      drivetrain.applyRequest(
+        () -> point.withModuleDirection(
+          new Rotation2d(
+            -driveController.getLeftY(),
+            -driveController.getLeftX()
+          )
+        )
+      )
+     );
+    driveController.a().onTrue(ShootSpeaker());
+    driveController.x().whileTrue(intakeSub.Reverse()).whileFalse(intakeSub.stop());
     driveController.y().whileTrue(shooterSub.RunAtVelocity(1));
     driveController.pov(0).whileTrue(shooterSub.RunAtPercent(-.50)).whileFalse(shooterSub.RunAtPercent(0));
     // reset the field-centric heading on left bumper press
@@ -65,10 +71,21 @@ public class RobotContainer {
     }
     drivetrain.registerTelemetry(logger::telemeterize);
   }
+  public Command ShootSpeaker(){
+    return 
+    intakeSub.Reverse()
+    .andThen(shooterSub.RunAtPercent(-0.5))
+    .andThen(new WaitCommand(0.3))
+    .andThen(intakeSub.stop())
+    .andThen(new WaitCommand(0.5))
+    .andThen(intakeSub.Run())
+    .andThen(new WaitCommand(0.5))
+    .andThen(shooterSub.stop())
+    .andThen(intakeSub.Run());
+  }
 
   public RobotContainer() {
-    NamedCommands.registerCommand("ShootSpeakerCommand", shooterSub.ShootSpeaker());
-    NamedCommands.registerCommand("IntakeCommand", intakeSub.run(50).andThen(new WaitCommand(1)));
+    NamedCommands.registerCommand("IntakeCommand", intakeSub.Run().andThen(new WaitCommand(1)));
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();

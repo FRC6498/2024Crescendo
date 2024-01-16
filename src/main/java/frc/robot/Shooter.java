@@ -4,50 +4,61 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkBase.ControlType;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 
 public class Shooter extends SubsystemBase {
   /** Creates a new Shooter. */
   CANSparkMax topMotor, bottomMotor;
+  SparkPIDController topPID, bottomPID;
   public Shooter() {
     topMotor = new CANSparkMax(14, MotorType.kBrushless);
     bottomMotor = new CANSparkMax(15, MotorType.kBrushless);
-    Slot0Configs configs = new Slot0Configs();
-    
+
+    topPID = topMotor.getPIDController();
+    bottomPID = bottomMotor.getPIDController();
+
+    topMotor.setInverted(true);
+    bottomMotor.setInverted(true);    
   }
+  /**
+   * Runs the shooter motors at different velocitys
+   * @param topMotorVelocity
+   * @param bottomMotorVelocity
+   * @return
+   */
   public Command RunAtVelocity(double topMotorVelocity, double bottomMotorVelocity){
-    return this.runOnce(()->
-      {
-        //topMotor.setControl(new VelocityDutyCycle(topMotorVelocity));
-        //bottomMotor.setControl(new VelocityDutyCycle(bottomMotorVelocity));
-      }
-      );
+    return 
+    this.runOnce(()-> topPID.setReference(topMotorVelocity, ControlType.kVelocity))
+    .alongWith(
+    this.runOnce(()->bottomPID.setReference(bottomMotorVelocity, ControlType.kVelocity))
+    );
   }
+  /**
+   * Runs both shooter motors at the same velocity
+   * @param velocity
+   * Velocity to run both motors at (rpm?)
+   * @return
+   */
   public Command RunAtVelocity(double velocity){
-    return this.runOnce(()->{
-       // topMotor.setControl(new VelocityDutyCycle(velocity));
-       // bottomMotor.setControl(new VelocityDutyCycle(velocity));
-    });
+    return
+    this.runOnce(()-> topPID.setReference(velocity, ControlType.kVelocity))
+    .alongWith(
+    this.runOnce(()->bottomPID.setReference(velocity, ControlType.kVelocity))
+    );
   }
   public Command RunAtPercent(double percent){
     return this.runOnce(()->
       topMotor.set(percent)).andThen(()->bottomMotor.set(percent)
     );
   }
-  public Command ShootSpeaker() {
-    return RunAtPercent(50).andThen(new WaitCommand(1)).andThen(stop());
-  }
   public Command stop() {
-    return this.runOnce(()->RunAtPercent(0));
-  }
-  public Command waitCommand(double seconds) {
-    return new WaitCommand(seconds);
+    return RunAtPercent(0);
   }
   
 
