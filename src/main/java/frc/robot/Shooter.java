@@ -62,6 +62,13 @@ public class Shooter extends SubsystemBase {
   public Command stop() {
     return RunAtPercent(0);
   }
+  public double GetShooterAverageRpm() {
+    return (topMotor.getEncoder().getVelocity() + bottomMotor.getEncoder().getVelocity())/2;
+  }
+  public double GetApproxExitVelocity() {
+    //TODO: figure out rpm vs exit velo function for the shooter
+    return 0;
+  }
   
 
   @Override
