@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.TunerConstants;
 
 public class RobotContainer {
@@ -39,6 +40,7 @@ public class RobotContainer {
   private final Telemetry logger = new Telemetry(MaxSpeed);
   private final Intake intakeSub = new Intake();
   private final Shooter shooterSub = new Shooter();
+  //private final Vision visionSub = new Vision(); // TODO: get the orangePi set up on the main robot asap
 
   private void configureBindings() {
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
@@ -47,7 +49,6 @@ public class RobotContainer {
             .withVelocityY(-driveController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-driveController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
-
     driveController.rightBumper().whileTrue(drivetrain.applyRequest(() -> brake));
     driveController.leftBumper().whileTrue(
       drivetrain.applyRequest(
@@ -59,13 +60,17 @@ public class RobotContainer {
         )
       )
      );
-    driveController.a().onTrue(ShootSpeaker());
-    driveController.x().whileTrue(intakeSub.Reverse()).whileFalse(intakeSub.stop());
-    driveController.y().whileTrue(shooterSub.RunAtVelocity(1));
-    driveController.pov(0).whileTrue(shooterSub.RunAtPercent(-.50)).whileFalse(shooterSub.RunAtPercent(0));
+    //driveController.a().onTrue(ShootSpeaker());
+    driveController.a().onTrue(shooterSub.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    driveController.b().onTrue(shooterSub.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    driveController.x().whileTrue(intakeSub.Run()).onFalse(intakeSub.stop());
+    driveController.y().whileTrue(intakeSub.Reverse()).whileFalse(intakeSub.stop());
+    //driveController.y().whileTrue(shooterSub.RunAtVelocity(1));
+    driveController.pov(0).whileTrue(shooterSub.Run()).whileFalse(shooterSub.stop());
     // reset the field-centric heading on left bumper press
-    driveController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
-
+    //driveController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
+    driveController.leftBumper().onTrue(shooterSub.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    driveController.rightBumper().onTrue(shooterSub.sysIdDynamic(SysIdRoutine.Direction.kForward));
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
@@ -74,14 +79,14 @@ public class RobotContainer {
   public Command ShootSpeaker(){
     return 
     intakeSub.Reverse()
-    .andThen(shooterSub.RunAtPercent(-0.5))
+    .andThen(shooterSub.Run())
     .andThen(new WaitCommand(0.3))
     .andThen(intakeSub.stop())
     .andThen(new WaitCommand(0.5))
     .andThen(intakeSub.Run())
     .andThen(new WaitCommand(0.5))
     .andThen(shooterSub.stop())
-    .andThen(intakeSub.Run());
+    .andThen(intakeSub.stop());
   }
 
   public RobotContainer() {
