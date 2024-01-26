@@ -4,25 +4,25 @@
 
 package frc.robot;
 
-import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
+import com.revrobotics.CANSparkMax;
 
-import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.AnalogTrigger;
 import edu.wpi.first.wpilibj.DigitalInput;
-import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
   CANSparkMax intakeMotor;
   AnalogTrigger intakeSensor;
+  DigitalInput newSensor;
+  boolean hasPiece;
 
   public Intake() {
+    newSensor = new DigitalInput(1);
     intakeSensor = new AnalogTrigger(0);
     intakeMotor = new CANSparkMax(16, MotorType.kBrushless);
     intakeMotor.setInverted(true);
@@ -38,7 +38,7 @@ public class Intake extends SubsystemBase {
    * @return
    */
   public Command Run() {
-    if (intakeSensor.getTriggerState()) {
+    if (hasPiece) {
      return this.runOnce(()->intakeMotor.set(0)); 
     }else{
       return this.runOnce(()->intakeMotor.set(IntakeConstants.DEFAULT_INTAKE_SPEED));
@@ -64,6 +64,8 @@ public class Intake extends SubsystemBase {
   @Override
   public void periodic() {
     SmartDashboard.putBoolean("intake has piece", intakeSensor.getTriggerState());
+    SmartDashboard.putBoolean("newIntakeSensor", newSensor.get());
+    hasPiece = newSensor.get();
     // This method will be called once per scheduler run
   }
 }
