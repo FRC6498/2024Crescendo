@@ -26,12 +26,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
+import static frc.robot.Constants.ShooterConstants.*;
+
 public class Shooter extends SubsystemBase {
   /** Creates a new Shooter. */
   private CANSparkMax topMotor, bottomMotor;
   private SparkPIDController topPID, bottomPID;
   //private double topMotorCurrentVelocity, bottomMotorCurrentVelocity;
-  double ShooterSpeedPercent = 1;
   private final MutableMeasure<Voltage> appliedTopVoltage = mutable(Volts.of(0));
   private final MutableMeasure<Angle> distance = mutable(Rotations.of(0));
   private final MutableMeasure<Velocity<Angle>> velocity = mutable(RPM.of(0));
@@ -54,15 +55,15 @@ public class Shooter extends SubsystemBase {
     topPID = topMotor.getPIDController();
     bottomPID = bottomMotor.getPIDController();
 
-    topPID.setP(0.011415);
-    topPID.setI(0.0);
-    topPID.setD(0.0);
-    topFF = new SimpleMotorFeedforward(-0.1924, 0.13174, 0.07513);
+    topPID.setP(TOP_MOTOR_KP);
+    topPID.setI(TOP_MOTOR_KI);
+    topPID.setD(TOP_MOTOR_KD);
+    topFF = new SimpleMotorFeedforward(TOP_MOTOR_KS, TOP_MOTOR_KV, TOP_MOTOR_KA);
 
-    bottomPID.setP(0.007482);
-    bottomPID.setI(0.0);
-    bottomPID.setD(0.0);
-    bottomFF = new SimpleMotorFeedforward(0.12187, 0.12947, 0.032151);
+    bottomPID.setP(BOTTOM_MOTOR_KP);
+    bottomPID.setI(BOTTOM_MOTOR_KI);
+    bottomPID.setD(BOTTOM_MOTOR_KD);
+    bottomFF = new SimpleMotorFeedforward(BOTTOM_MOTOR_KS, BOTTOM_MOTOR_KV, BOTTOM_MOTOR_KA);
 
     // sysid
     routine = new SysIdRoutine(
@@ -115,7 +116,7 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command Run() {
-    return this.runOnce(() -> topMotor.set(ShooterSpeedPercent)).andThen(() -> bottomMotor.set(ShooterSpeedPercent));
+    return this.runOnce(() -> topMotor.set(DEFAULT_SHOOTER_SPEED)).andThen(() -> bottomMotor.set(DEFAULT_SHOOTER_SPEED));
   }
 
   public Command stop() {
