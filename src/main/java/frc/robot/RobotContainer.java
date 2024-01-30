@@ -13,7 +13,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.subsystems.Drivetrain;
+import frc.robot.generated.CommandSwerveDrivetrain;
+import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Shooter;
 
@@ -28,7 +29,7 @@ public class RobotContainer {
   private final Telemetry logger = new Telemetry();
   private final Intake intakeSub = new Intake();
   private final Shooter shooterSub = new Shooter();
-  private final Drivetrain driveSub = new Drivetrain(logger);
+  private final CommandSwerveDrivetrain driveSub = TunerConstants.DriveTrain;
   private final Vision vision = new Vision(driveSub::getRobotPose2d);
 
   private void configureBindings() {
@@ -46,6 +47,7 @@ public class RobotContainer {
     SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();
     DriverStation.silenceJoystickConnectionWarning(true);
+    driveSub.registerTelemetry((state) -> logger.telemeterize(state));
   }
 
   public Command getAutonomousCommand() {
