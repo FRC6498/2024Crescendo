@@ -16,6 +16,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.generated.TunerConstants;
 
@@ -28,9 +29,11 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
+    Vision vision;
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
+        vision = new Vision();
         configurePathPlanner();
         if (Utils.isSimulation()) {
             startSimThread();
@@ -38,10 +41,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
+        vision = new Vision();
         configurePathPlanner();
         if (Utils.isSimulation()) {
             startSimThread();
         }
+        
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
@@ -85,5 +90,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public ChassisSpeeds getCurrentRobotChassisSpeeds() {
         return m_kinematics.toChassisSpeeds(getState().ModuleStates);
+    }
+    public void periodic() {
+        var visionEst = vision.updatePoseEstimator();
+        if (visionEst.isPresent()){
+            m_odometry.addVisionMeasurement(visionEst.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
+            Commands.print("update");
+        }  
     }
 }

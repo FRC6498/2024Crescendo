@@ -4,14 +4,20 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
+import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.util.Units;
 
 /** Add your docs here. */
 public final class Constants {
     public static final class VisionConstants{
-       public static final Transform3d ROBOT_TO_CAMERA = new Transform3d();//TODO: Get the robot to camera transform
+       public static final Transform3d ROBOT_TO_CAMERA = new Transform3d(new Translation3d(Units.inchesToMeters(8), 0, Units.inchesToMeters(8.125)), new Rotation3d(0, 0, 0));//TODO: Get the robot to camera transform
     }
     public static final class FieldConstants{
         public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
@@ -40,5 +46,17 @@ public final class Constants {
 
         public static final double DEFAULT_SHOOTER_SPEED = 0.75;
 
+    }
+    public static final class LedConstants {
+        public static final int LED_LENGTH = 1;
+    }
+    public static final class ArmConstants {
+        public static final Slot0Configs armConfigs = new Slot0Configs()
+        .withKP(0)
+        .withKI(0)
+        .withKD(0)
+        .withKS(0)
+        .withKV(0)
+        .withKA(0);
     }
 }

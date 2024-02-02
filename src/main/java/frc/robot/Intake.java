@@ -22,50 +22,55 @@ public class Intake extends SubsystemBase {
   boolean hasPiece;
 
   public Intake() {
-    newSensor = new DigitalInput(1);
-    intakeSensor = new AnalogTrigger(0);
-    intakeMotor = new CANSparkMax(16, MotorType.kBrushless);
-    intakeMotor.setInverted(true);
-    intakeMotor.setIdleMode(IdleMode.kBrake);
-    SmartDashboard.putNumber("Intake Speed Percent", IntakeConstants.DEFAULT_INTAKE_SPEED);
-    intakeSensor.setLimitsVoltage(0.5, 1.3);
+    //newSensor = new DigitalInput(1);
+    //intakeSensor = new AnalogTrigger(0);
+    //intakeMotor = new CANSparkMax(16, MotorType.kBrushless);
+    //intakeMotor.setInverted(true);
+    //intakeMotor.setIdleMode(IdleMode.kBrake);
+    //SmartDashboard.putNumber("Intake Speed Percent", IntakeConstants.DEFAULT_INTAKE_SPEED);
+    //intakeSensor.setLimitsVoltage(0.5, 1.3);
   }
   public Command runAtPrecent(double percent) {
-    return this.runOnce(()->intakeMotor.set(percent));
+    //return this.runOnce(()->intakeMotor.set(percent));
+    return null;
   }
   /**
    * Runs the intake at default speed in the forward direction
    * @return
    */
   public Command Run() {
-    if (hasPiece) {
-     return this.runOnce(()->intakeMotor.set(0)); 
-    }else{
-      return this.runOnce(()->intakeMotor.set(IntakeConstants.DEFAULT_INTAKE_SPEED));
-    }
+    //if (hasPiece) {
+    // return this.runOnce(()->intakeMotor.set(0)); 
+    //}else{
+    //  return this.runOnce(()->intakeMotor.set(IntakeConstants.DEFAULT_INTAKE_SPEED));
+    // }
+    return null;
   }
   /**
    * Runs the intake at default speed in the reverse direction
    * @return
    */
   public Command Reverse() {
-    return runAtPrecent(-IntakeConstants.DEFAULT_INTAKE_SPEED);
+    // return runAtPrecent(-IntakeConstants.DEFAULT_INTAKE_SPEED);
+    return null;
   }
   /**
    * Stops the intake
    * @return
    */
   public Command stop() {
-    return runAtPrecent(0);
+    // return runAtPrecent(0);
+    return null;
   }
   public boolean GetSensor() {
-    return intakeSensor.getTriggerState();
+    // return intakeSensor.getTriggerState();
+    return true;
   }
   @Override
   public void periodic() {
-    SmartDashboard.putBoolean("intake has piece", intakeSensor.getTriggerState());
-    SmartDashboard.putBoolean("newIntakeSensor", newSensor.get());
-    hasPiece = newSensor.get();
+    // SmartDashboard.putBoolean("intake has piece", intakeSensor.getTriggerState());
+    // SmartDashboard.putBoolean("newIntakeSensor", newSensor.get());
+    // hasPiece = newSensor.get();
     // This method will be called once per scheduler run
   }
 }

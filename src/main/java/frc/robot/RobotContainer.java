@@ -38,9 +38,9 @@ public class RobotContainer {
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
   private final Telemetry logger = new Telemetry(MaxSpeed);
-  private final Intake intakeSub = new Intake();
-  private final Shooter shooterSub = new Shooter();
-  //private final Vision visionSub = new Vision(); // TODO: get the orangePi set up on the main robot asap
+  //private final Intake intakeSub = new Intake();
+  private final Climber climber = new Climber();
+  //private final Shooter shooterSub = new Shooter();
 
   private void configureBindings() {
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
@@ -61,36 +61,38 @@ public class RobotContainer {
       )
      );
     //driveController.a().onTrue(ShootSpeaker());
-    driveController.a().onTrue(shooterSub.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    driveController.b().onTrue(shooterSub.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    driveController.x().whileTrue(intakeSub.Run()).onFalse(intakeSub.stop());
-    driveController.y().whileTrue(intakeSub.Reverse()).whileFalse(intakeSub.stop());
+    // driveController.a().onTrue(shooterSub.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+    // driveController.b().onTrue(shooterSub.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+    driveController.a().onTrue(climber.Run()).onFalse(climber.Stop());
+    driveController.b().onTrue(climber.Reverse()).onFalse(climber.Stop());
+    // driveController.x().whileTrue(intakeSub.Run()).onFalse(intakeSub.stop());
+    // driveController.y().whileTrue(intakeSub.Reverse()).whileFalse(intakeSub.stop());
     //driveController.y().whileTrue(shooterSub.RunAtVelocity(1));
-    driveController.pov(0).whileTrue(shooterSub.Run()).whileFalse(shooterSub.stop());
+    // driveController.pov(0).whileTrue(shooterSub.Run()).whileFalse(shooterSub.stop());
     // reset the field-centric heading on left bumper press
     //driveController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
-    driveController.leftBumper().onTrue(shooterSub.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    driveController.rightBumper().onTrue(shooterSub.sysIdDynamic(SysIdRoutine.Direction.kForward));
+    // driveController.leftBumper().onTrue(shooterSub.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+    // driveController.rightBumper().onTrue(shooterSub.sysIdDynamic(SysIdRoutine.Direction.kForward));
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
     drivetrain.registerTelemetry(logger::telemeterize);
   }
-  public Command ShootSpeaker(){
-    return 
-    intakeSub.Reverse()
-    .andThen(shooterSub.Run())
-    .andThen(new WaitCommand(0.3))
-    .andThen(intakeSub.stop())
-    .andThen(new WaitCommand(0.5))
-    .andThen(intakeSub.Run())
-    .andThen(new WaitCommand(0.5))
-    .andThen(shooterSub.stop())
-    .andThen(intakeSub.stop());
-  }
+  // public Command ShootSpeaker(){
+  //   return 
+  //   intakeSub.Reverse()
+  //   .andThen(shooterSub.Run())
+  //   .andThen(new WaitCommand(0.3))
+  //   .andThen(intakeSub.stop())
+  //   .andThen(new WaitCommand(0.5))
+  //   .andThen(intakeSub.Run())
+  //   .andThen(new WaitCommand(0.5))
+  //   .andThen(shooterSub.stop())
+  //   .andThen(intakeSub.stop());
+  // }
 
   public RobotContainer() {
-    NamedCommands.registerCommand("IntakeCommand", intakeSub.Run().andThen(new WaitCommand(1)));
+   // NamedCommands.registerCommand("IntakeCommand", intakeSub.Run().andThen(new WaitCommand(1)));
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
     configureBindings();

@@ -40,30 +40,30 @@ public class Shooter extends SubsystemBase {
   SimpleMotorFeedforward topFF, bottomFF;
 
   public Shooter() {
-    topMotor = new CANSparkMax(14, MotorType.kBrushless);
-    bottomMotor = new CANSparkMax(15, MotorType.kBrushless);
+    // topMotor = new CANSparkMax(14, MotorType.kBrushless);
+    // bottomMotor = new CANSparkMax(15, MotorType.kBrushless);
 
-    topMotor.getEncoder().setPosition(0);
-    bottomMotor.getEncoder().setPositionConversionFactor(0);
+    // topMotor.getEncoder().setPosition(0);
+    // bottomMotor.getEncoder().setPositionConversionFactor(0);
 
-    topMotor.setInverted(true);
-    bottomMotor.setInverted(true);
+    // topMotor.setInverted(true);
+    // bottomMotor.setInverted(true);
 
-    topMotor.setIdleMode(IdleMode.kCoast);
-    bottomMotor.setIdleMode(IdleMode.kCoast);
+    // topMotor.setIdleMode(IdleMode.kCoast);
+    // bottomMotor.setIdleMode(IdleMode.kCoast);
 
-    topPID = topMotor.getPIDController();
-    bottomPID = bottomMotor.getPIDController();
+    // topPID = topMotor.getPIDController();
+    // bottomPID = bottomMotor.getPIDController();
 
-    topPID.setP(TOP_MOTOR_KP);
-    topPID.setI(TOP_MOTOR_KI);
-    topPID.setD(TOP_MOTOR_KD);
-    topFF = new SimpleMotorFeedforward(TOP_MOTOR_KS, TOP_MOTOR_KV, TOP_MOTOR_KA);
+    // topPID.setP(TOP_MOTOR_KP);
+    // topPID.setI(TOP_MOTOR_KI);
+    // topPID.setD(TOP_MOTOR_KD);
+    // topFF = new SimpleMotorFeedforward(TOP_MOTOR_KS, TOP_MOTOR_KV, TOP_MOTOR_KA);
 
-    bottomPID.setP(BOTTOM_MOTOR_KP);
-    bottomPID.setI(BOTTOM_MOTOR_KI);
-    bottomPID.setD(BOTTOM_MOTOR_KD);
-    bottomFF = new SimpleMotorFeedforward(BOTTOM_MOTOR_KS, BOTTOM_MOTOR_KV, BOTTOM_MOTOR_KA);
+    // bottomPID.setP(BOTTOM_MOTOR_KP);
+    // bottomPID.setI(BOTTOM_MOTOR_KI);
+    // bottomPID.setD(BOTTOM_MOTOR_KD);
+    // bottomFF = new SimpleMotorFeedforward(BOTTOM_MOTOR_KS, BOTTOM_MOTOR_KV, BOTTOM_MOTOR_KA);
 
     // sysid
     routine = new SysIdRoutine(
@@ -96,9 +96,10 @@ public class Shooter extends SubsystemBase {
    * @return
    */
   public Command RunAtVelocity(double topMotorVelocity, double bottomMotorVelocity) {
-    return this.runOnce(() -> topPID.setReference(topMotorVelocity, ControlType.kVelocity))
-        .alongWith(
-            this.runOnce(() -> bottomPID.setReference(bottomMotorVelocity, ControlType.kVelocity)));
+    // return this.runOnce(() -> topPID.setReference(topMotorVelocity, ControlType.kVelocity))
+    //     .alongWith(
+    //         this.runOnce(() -> bottomPID.setReference(bottomMotorVelocity, ControlType.kVelocity)));
+    return null;
   }
 
   /**
@@ -109,22 +110,26 @@ public class Shooter extends SubsystemBase {
    * @return
    */
   public Command RunAtVelocity(double velocity) {
-    return this.runOnce(() -> topPID.setReference(velocity, ControlType.kVelocity, 0, topFF.calculate(velocity)))
-        .andThen(
-            this.runOnce(
-                () -> bottomPID.setReference(velocity, ControlType.kVelocity, 0, bottomFF.calculate(velocity))));
+    // return this.runOnce(() -> topPID.setReference(velocity, ControlType.kVelocity, 0, topFF.calculate(velocity)))
+    //     .andThen(
+    //         this.runOnce(
+    //             () -> bottomPID.setReference(velocity, ControlType.kVelocity, 0, bottomFF.calculate(velocity))));
+    return null;
   }
 
   public Command Run() {
-    return this.runOnce(() -> topMotor.set(DEFAULT_SHOOTER_SPEED)).andThen(() -> bottomMotor.set(DEFAULT_SHOOTER_SPEED));
+    // return this.runOnce(() -> topMotor.set(DEFAULT_SHOOTER_SPEED)).andThen(() -> bottomMotor.set(DEFAULT_SHOOTER_SPEED));
+    return null;
   }
 
   public Command stop() {
-    return this.runOnce(() -> topMotor.set(0)).andThen(() -> bottomMotor.set(0));
+    // return this.runOnce(() -> topMotor.set(0)).andThen(() -> bottomMotor.set(0));
+    return null;
   }
 
   public double GetShooterAverageRpm() {
-    return (topMotor.getEncoder().getVelocity() + bottomMotor.getEncoder().getVelocity()) / 2;
+    // return (topMotor.getEncoder().getVelocity() + bottomMotor.getEncoder().getVelocity()) / 2;
+    return 0;
   }
 
   public double GetApproxExitVelocity() {
@@ -133,15 +138,17 @@ public class Shooter extends SubsystemBase {
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-    topMotor.getEncoder().setPosition(0);
-    bottomMotor.getEncoder().setPosition(0);
-    return routine.quasistatic(direction);
+    // topMotor.getEncoder().setPosition(0);
+    // bottomMotor.getEncoder().setPosition(0);
+    // return routine.quasistatic(direction);
+    return null;
   }
 
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-    topMotor.getEncoder().setPosition(0);
-    bottomMotor.getEncoder().setPosition(0);
-    return routine.dynamic(direction);
+    // topMotor.getEncoder().setPosition(0);
+    // bottomMotor.getEncoder().setPosition(0);
+    // return routine.dynamic(direction);
+    return null;
   }
 
   @Override
