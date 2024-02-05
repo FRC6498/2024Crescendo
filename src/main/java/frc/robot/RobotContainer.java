@@ -31,25 +31,41 @@ public class RobotContainer {
   private final CommandXboxController driveController = new CommandXboxController(0); // My joystick
   private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
 
-  private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-      .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+  private final SwerveRequest.FieldCentric FieldCentricDrive = new SwerveRequest.FieldCentric()
+      .withDeadband(MaxSpeed * 0.1)
+      .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
                                                                // driving in open loop
+  private final SwerveRequest.RobotCentric RobotCentricDrive = new SwerveRequest.RobotCentric()
+    .withDeadband(MaxSpeed * 0.1)
+    .withRotationalDeadband(MaxAngularRate * 0.1)
+    .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+  private final SwerveRequest.FieldCentric spin = new SwerveRequest.FieldCentric()
+    .withDeadband(MaxSpeed * 0.1)
+    .withRotationalDeadband(MaxAngularRate * 0.1)
+    .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+  private final SwerveRequest.FieldCentricFacingAngle faceAngle = new SwerveRequest.FieldCentricFacingAngle()
+    .withDeadband(MaxSpeed * 0.1)
+    .withRotationalDeadband(MaxAngularRate * 0.1)
+    .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
   private final Telemetry logger = new Telemetry(MaxSpeed);
   //private final Intake intakeSub = new Intake();
   private final Climber climber = new Climber();
   //private final Shooter shooterSub = new Shooter();
 
   private void configureBindings() {
+    //* drive fieldcentric by default */
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(() -> drive.withVelocityX(-driveController.getLeftY() * MaxSpeed) // Drive forward with
+        drivetrain.applyRequest(() -> FieldCentricDrive.withVelocityX(-driveController.getLeftY() * MaxSpeed) // Drive forward with
                                                                                            // negative Y (forward)
             .withVelocityY(-driveController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-driveController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
+    //* brake the drive motors */
     driveController.rightBumper().whileTrue(drivetrain.applyRequest(() -> brake));
+    //* point the modules at to a target rotation (idk what the point of this is) */
     driveController.leftBumper().whileTrue(
       drivetrain.applyRequest(
         () -> point.withModuleDirection(
@@ -65,6 +81,19 @@ public class RobotContainer {
     // driveController.b().onTrue(shooterSub.sysIdDynamic(SysIdRoutine.Direction.kReverse));
     driveController.a().onTrue(climber.Run()).onFalse(climber.Stop());
     driveController.b().onTrue(climber.Reverse()).onFalse(climber.Stop());
+    //* run drive in RobotCentric
+    driveController.x().onTrue(drivetrain.run(()-> drivetrain.applyRequest(
+      ()-> RobotCentricDrive
+        .withVelocityX(-driveController.getLeftY() * MaxSpeed)
+        .withVelocityY(-driveController.getLeftX() * MaxSpeed)
+        .withRotationalRate(-driveController.getRightX() * MaxAngularRate))));
+    //* face the speaker depending on what alliance you are on */
+    driveController.y().onTrue(drivetrain.run(
+      ()-> faceAngle
+        .withVelocityX(-driveController.getLeftY() * MaxSpeed)
+        .withVelocityY(-driveController.getLeftX() * MaxSpeed)
+        .withTargetDirection(drivetrain.getRobotToSpeakerRotation())
+        ));
     // driveController.x().whileTrue(intakeSub.Run()).onFalse(intakeSub.stop());
     // driveController.y().whileTrue(intakeSub.Reverse()).whileFalse(intakeSub.stop());
     //driveController.y().whileTrue(shooterSub.RunAtVelocity(1));
@@ -79,7 +108,7 @@ public class RobotContainer {
     drivetrain.registerTelemetry(logger::telemeterize);
   }
   // public Command ShootSpeaker(){
-  //   return 
+  //   return
   //   intakeSub.Reverse()
   //   .andThen(shooterSub.Run())
   //   .andThen(new WaitCommand(0.3))
