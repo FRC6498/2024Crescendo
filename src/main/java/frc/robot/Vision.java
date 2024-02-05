@@ -33,7 +33,6 @@ public class Vision extends SubsystemBase {
   
   public boolean isBlueAlliance;
   public Vision() {
-    isBlueAlliance = NetworkTableInstance.getDefault().getTable("FMS").getBooleanTopic("alliance").subscribe(true, PubSubOption.periodic(10)).get();
     mainCam = new PhotonCamera("mainCamera");
     visionPoseEstimator = new PhotonPoseEstimator(FieldConstants.FIELD_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,mainCam,  VisionConstants.ROBOT_TO_CAMERA); 
     visionPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
