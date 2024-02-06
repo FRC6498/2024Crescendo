@@ -24,18 +24,14 @@ import frc.robot.generated.TunerConstants;
 public class RobotContainer {
   private double MaxSpeed = 6; // 6 meters per second desired top speed
   private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
-
   private final SendableChooser<Command> autoChooser;
-
   /* Setting up bindings for necessary control of the swerve drive platform */
   private final CommandXboxController driveController = new CommandXboxController(0); // My joystick
   private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
-
   private final SwerveRequest.FieldCentric FieldCentricDrive = new SwerveRequest.FieldCentric()
       .withDeadband(MaxSpeed * 0.1)
-      .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
-                                                               // driving in open loop
+      .withRotationalDeadband(MaxAngularRate * 0.1)
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
   private final SwerveRequest.RobotCentric RobotCentricDrive = new SwerveRequest.RobotCentric()
     .withDeadband(MaxSpeed * 0.1)
     .withRotationalDeadband(MaxAngularRate * 0.1)
@@ -58,24 +54,23 @@ public class RobotContainer {
   private void configureBindings() {
     //* drive fieldcentric by default */
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-        drivetrain.applyRequest(() -> FieldCentricDrive.withVelocityX(-driveController.getLeftY() * MaxSpeed) // Drive forward with
-                                                                                           // negative Y (forward)
-            .withVelocityY(-driveController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-            .withRotationalRate(-driveController.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+        drivetrain.applyRequest(() -> FieldCentricDrive
+          .withVelocityX(-driveController.getLeftY() * MaxSpeed)
+          .withVelocityY(-driveController.getLeftX() * MaxSpeed)
+          .withRotationalRate(-driveController.getRightX() * MaxAngularRate)
         ));
     //* brake the drive motors */
     driveController.rightBumper().whileTrue(drivetrain.applyRequest(() -> brake));
-    //* point the modules at to a target rotation (idk what the point of this is) */
-    driveController.leftBumper().whileTrue(
+    //* go back to field centric drive */
+    driveController.leftBumper().whileTrue(drivetrain.run(()->
       drivetrain.applyRequest(
-        () -> point.withModuleDirection(
-          new Rotation2d(
-            -driveController.getLeftY(),
-            -driveController.getLeftX()
+          () -> FieldCentricDrive
+          .withVelocityX(-driveController.getLeftY() * MaxSpeed)
+          .withVelocityY(-driveController.getLeftX() * MaxSpeed)
+          .withRotationalRate(-driveController.getRightX() * MaxAngularRate)
           )
         )
-      )
-     );
+      );
     //driveController.a().onTrue(ShootSpeaker());
     // driveController.a().onTrue(shooterSub.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
     // driveController.b().onTrue(shooterSub.sysIdDynamic(SysIdRoutine.Direction.kReverse));
