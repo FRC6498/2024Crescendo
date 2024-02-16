@@ -22,7 +22,7 @@ public final class Constants {
     public static final class FieldConstants{
         public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
         public static final int BLUE_SPEAKER_TAG_ID = 4;//TODO:check if blue tag ids are right
-        public static final int RED_SPEAKER_TAG_ID = 8; 
+        public static final int RED_SPEAKER_TAG_ID = 8;
     }
     public static final class IntakeConstants{
         /**Speed that the intake will run at unless directly overridden by the runAtPercent command */
@@ -51,6 +51,7 @@ public final class Constants {
         public static final int LED_LENGTH = 1;
     }
     public static final class ArmConstants {
+        // TODO: config arm constants
         public static final Slot0Configs armConfigs = new Slot0Configs()
         .withKP(0)
         .withKI(0)
@@ -58,5 +59,8 @@ public final class Constants {
         .withKS(0)
         .withKV(0)
         .withKA(0);
+        public static final double ARM_KS = 0;
+        public static final double ARM_KG = 0;
+        public static final double ARM_KV = 0;
     }
 }
