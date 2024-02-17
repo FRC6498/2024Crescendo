@@ -11,15 +11,16 @@ public class Climber extends SubsystemBase {
   public Climber() {
     LeftClimberMotor = new TalonFX(20);
     RightClimberMotor = new TalonFX(14);
+    climberSensor = new DigitalInput(0); // TODO: get climber sensor port
   }
   public Command Run(){
     return this.run(
-      ()-> LeftClimberMotor.set(0.5))
+      ()-> LeftClimberMotor.set(0.5)).until(()-> climberSensor.get())
       .andThen(()-> RightClimberMotor.set(0.5))
       .until(()-> climberSensor.get());
   }
   public Command Reverse() {
-    return this.runOnce(()-> RightClimberMotor.set(1)).andThen(()-> LeftClimberMotor.set(1));
+    return this.runOnce(()-> RightClimberMotor.set(-1)).andThen(()-> LeftClimberMotor.set(-1));
   }
   public Command Stop() {
     return this.runOnce(()-> LeftClimberMotor.set(0)).andThen(()-> RightClimberMotor.set(0));

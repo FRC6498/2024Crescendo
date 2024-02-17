@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import java.security.spec.ECFieldF2m;
+import java.util.function.BooleanSupplier;
+
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
@@ -22,12 +25,12 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.TunerConstants;
 
 public class RobotContainer {
-  private double MaxSpeed = 6; // 6 meters per second desired top speed
-  private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
+  private double MaxSpeed = 6;
+  private double MaxAngularRate = 1.5 * Math.PI;
   private final SendableChooser<Command> autoChooser;
-  /* Setting up bindings for necessary control of the swerve drive platform */
-  private final CommandXboxController driveController = new CommandXboxController(0); // My joystick
-  private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain; // My drivetrain
+  private final CommandXboxController driverController, operatorController;
+  private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain;
+//#region Swerve drive commands
   private final SwerveRequest.FieldCentric FieldCentricDrive = new SwerveRequest.FieldCentric()
       .withDeadband(MaxSpeed * 0.1)
       .withRotationalDeadband(MaxAngularRate * 0.1)
@@ -46,82 +49,73 @@ public class RobotContainer {
     .withDeadband(MaxSpeed * 0.1)
     .withRotationalDeadband(MaxAngularRate * 0.1)
     .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-  private final Telemetry logger = new Telemetry(MaxSpeed);
-  //private final Intake intakeSub = new Intake();
-  private final Climber climber = new Climber();
-  //private final Shooter shooterSub = new Shooter();
+//#endregion
+  private final Telemetry logger;
+  private final Intake intakeSub;
+  private final Climber climber;
+  private final Shooter shooterSub;
+  private final Arm armSub;
 
+  public RobotContainer() {
+    driverController = new CommandXboxController(0);
+    operatorController = new CommandXboxController(1);
+    logger = new Telemetry(MaxSpeed);
+    intakeSub = new Intake();
+    climber = new Climber();
+    shooterSub = new Shooter();
+    armSub = new Arm();
+    autoChooser = AutoBuilder.buildAutoChooser();
+    SmartDashboard.putData("Auto Chooser", autoChooser);
+    configureBindings();
+  }
   private void configureBindings() {
+    //#region drive commands
     //* drive fieldcentric by default */
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
         drivetrain.applyRequest(() -> FieldCentricDrive
-          .withVelocityX(-driveController.getLeftY() * MaxSpeed)
-          .withVelocityY(-driveController.getLeftX() * MaxSpeed)
-          .withRotationalRate(-driveController.getRightX() * MaxAngularRate)
+          .withVelocityX(-driverController.getLeftY() * MaxSpeed)
+          .withVelocityY(-driverController.getLeftX() * MaxSpeed)
+          .withRotationalRate(-driverController.getRightX() * MaxAngularRate)
         ));
     //* brake the drive motors */
-    driveController.rightBumper().whileTrue(drivetrain.applyRequest(() -> brake));
+    driverController.rightBumper().whileTrue(drivetrain.applyRequest(() -> brake));
     //* go back to field centric drive */
-    driveController.leftBumper().whileTrue(drivetrain.run(()->
+    driverController.leftBumper().whileTrue(drivetrain.run(()->
       drivetrain.applyRequest(
           () -> FieldCentricDrive
-          .withVelocityX(-driveController.getLeftY() * MaxSpeed)
-          .withVelocityY(-driveController.getLeftX() * MaxSpeed)
-          .withRotationalRate(-driveController.getRightX() * MaxAngularRate)
+          .withVelocityX(-driverController.getLeftY() * MaxSpeed)
+          .withVelocityY(-driverController.getLeftX() * MaxSpeed)
+          .withRotationalRate(-driverController.getRightX() * MaxAngularRate)
           )
         )
       );
-    //driveController.a().onTrue(ShootSpeaker());
-    // driveController.a().onTrue(shooterSub.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-    // driveController.b().onTrue(shooterSub.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-    driveController.a().onTrue(climber.Run()).onFalse(climber.Stop());
-    driveController.b().onTrue(climber.Reverse()).onFalse(climber.Stop());
-    //* run drive in RobotCentric
-    driveController.x().onTrue(drivetrain.run(()-> drivetrain.applyRequest(
+    driverController.x().onTrue(drivetrain.run(()-> drivetrain.applyRequest(
       ()-> RobotCentricDrive
-        .withVelocityX(-driveController.getLeftY() * MaxSpeed)
-        .withVelocityY(-driveController.getLeftX() * MaxSpeed)
-        .withRotationalRate(-driveController.getRightX() * MaxAngularRate))));
-    //* face the speaker depending on what alliance you are on */
-    driveController.y().onTrue(drivetrain.run(
+        .withVelocityX(-driverController.getLeftY() * MaxSpeed)
+        .withVelocityY(-driverController.getLeftX() * MaxSpeed)
+        .withRotationalRate(-driverController.getRightX() * MaxAngularRate))));
+    driverController.y().onTrue(drivetrain.run(
       ()-> faceAngle
-        .withVelocityX(-driveController.getLeftY() * MaxSpeed)
-        .withVelocityY(-driveController.getLeftX() * MaxSpeed)
+        .withVelocityX(-driverController.getLeftY() * MaxSpeed)
+        .withVelocityY(-driverController.getLeftX() * MaxSpeed)
         .withTargetDirection(drivetrain.getRobotToSpeakerRotation())
         ));
-    // driveController.x().whileTrue(intakeSub.Run()).onFalse(intakeSub.stop());
-    // driveController.y().whileTrue(intakeSub.Reverse()).whileFalse(intakeSub.stop());
-    //driveController.y().whileTrue(shooterSub.RunAtVelocity(1));
-    // driveController.pov(0).whileTrue(shooterSub.Run()).whileFalse(shooterSub.stop());
-    // reset the field-centric heading on left bumper press
-    //driveController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
-    // driveController.leftBumper().onTrue(shooterSub.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-    // driveController.rightBumper().onTrue(shooterSub.sysIdDynamic(SysIdRoutine.Direction.kForward));
+//#endregion
+    operatorController.leftBumper().onTrue(climber.Run()).onFalse(climber.Stop());
+    operatorController.rightBumper().onTrue(climber.Reverse()).onFalse(climber.Stop());
+    operatorController.a().onTrue(intakeSub.Run()).onFalse(intakeSub.stop());
+    operatorController.b().onTrue(armSub.RotateToAbsoluteAngle(new Rotation2d(0.17))); // rotates arm to intake position
+    operatorController.x().onTrue(armSub.RotateToAbsoluteAngle(new Rotation2d(1.571))); // rotates arm to amp position
+
+    armSub.setDefaultCommand(intakeToArm(intakeSub.GetSensor(), armSub.getArmAtBottom()));
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
     drivetrain.registerTelemetry(logger::telemeterize);
   }
-  // public Command ShootSpeaker(){
-  //   return
-  //   intakeSub.Reverse()
-  //   .andThen(shooterSub.Run())
-  //   .andThen(new WaitCommand(0.3))
-  //   .andThen(intakeSub.stop())
-  //   .andThen(new WaitCommand(0.5))
-  //   .andThen(intakeSub.Run())
-  //   .andThen(new WaitCommand(0.5))
-  //   .andThen(shooterSub.stop())
-  //   .andThen(intakeSub.stop());
-  // }
-
-  public RobotContainer() {
-   // NamedCommands.registerCommand("IntakeCommand", intakeSub.Run().andThen(new WaitCommand(1)));
-    autoChooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData("Auto Chooser", autoChooser);
-    configureBindings();
+  private Command intakeToArm(Boolean intakeHasNote, Boolean armAtBottom) {
+    return armSub.runOnce(()-> armSub.IntakeArm()).onlyIf(()-> intakeHasNote && armAtBottom);
   }
-
   public Command getAutonomousCommand() {
    return autoChooser.getSelected();
   }

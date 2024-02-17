@@ -31,6 +31,10 @@ public class Arm extends SubsystemBase {
   public Arm() {
     LeftArmMotor = new TalonFX(19);
     RightArmMotor = new TalonFX(15);
+
+    LeftArmMotor.setPosition(0);
+    RightArmMotor.setPosition(0);
+
     ArmIntake = new TalonFX(18);
     Slot0Configs configs = ArmConstants.armConfigs;
     LeftArmMotor.getConfigurator().apply(configs);
@@ -100,6 +104,13 @@ public class Arm extends SubsystemBase {
   }
   public Command IntakeArm() {
     return this.runOnce(()-> ArmIntake.set(0.5));
+  }
+  public Boolean getArmAtBottom() {
+    if (LeftArmMotor.getPosition().getValue() < 0.2 ) {
+      return true;
+    }else{
+      return false;
+    }
   }
 
 //#region sysid commands
