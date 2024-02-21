@@ -1,14 +1,9 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -30,16 +25,16 @@ public final class Constants {
     }
     public static final class ShooterConstants{
         //Top shooter sysid constants
-        public static final double TOP_MOTOR_KP = 0.011415;
+        public static final double TOP_MOTOR_KP = 0.00011415;
         public static final double TOP_MOTOR_KI = 0;
-        public static final double TOP_MOTOR_KD = 0;
+        public static final double TOP_MOTOR_KD = 0.0001;
         public static final double TOP_MOTOR_KS = -0.1924;
         public static final double TOP_MOTOR_KV = 0.13174;
         public static final double TOP_MOTOR_KA = 0.07513;
         //Bottom shooter motor sysid constants
-        public static final double BOTTOM_MOTOR_KP = 0.007482;
+        public static final double BOTTOM_MOTOR_KP = 0.0001482;
         public static final double BOTTOM_MOTOR_KI = 0;
-        public static final double BOTTOM_MOTOR_KD = 0;
+        public static final double BOTTOM_MOTOR_KD = 0.0001;
         public static final double BOTTOM_MOTOR_KS = 0.12187;
         public static final double BOTTOM_MOTOR_KV = 0.12947;
         public static final double BOTTOM_MOTOR_KA = 0.032151;
@@ -53,14 +48,11 @@ public final class Constants {
     public static final class ArmConstants {
         // TODO: config arm constants
         public static final Slot0Configs armConfigs = new Slot0Configs()
-        .withKP(0)
+        .withKP(3)
         .withKI(0)
-        .withKD(0)
-        .withKS(0)
-        .withKV(0)
-        .withKA(0);
+        .withKD(0.5);
         public static final double ARM_KS = 0;
-        public static final double ARM_KG = 0;
-        public static final double ARM_KV = 0;
+        public static final double ARM_KG = 0.06;
+        public static final double ARM_KV = 2.26;
     }
 }

@@ -52,7 +52,7 @@ public class ShootWhileMoving extends Command {
 
     //these make a right triangle
     distanceToSpeaker = visionSub.GetRobotToSpeakerDistance();
-    goalDeltaX = (shooterSub.GetApproxExitVelocity()*distanceToSpeaker) * speedPerpendicularToSpeaker;
+    goalDeltaX = (distanceToSpeaker) * speedPerpendicularToSpeaker;
 
     //trig to find angle after robot has moved    
     CorrectedShotAngle = currentRotation.plus(new Rotation2d(Math.atan(goalDeltaX/distanceToSpeaker)));

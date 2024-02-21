@@ -42,22 +42,26 @@ public class Shooter extends SubsystemBase {
   public Shooter() {
     topMotor = new CANSparkMax(16, MotorType.kBrushless);
     bottomMotor = new CANSparkMax(17, MotorType.kBrushless);
+    topMotor.setInverted(false);
+    bottomMotor.setInverted(false);
+
+
     topMotor.getEncoder().setPosition(0);
-    bottomMotor.getEncoder().setPositionConversionFactor(0);
-    topMotor.setInverted(true);
-    bottomMotor.setInverted(true);
+    bottomMotor.getEncoder().setPosition(0);
     topMotor.setIdleMode(IdleMode.kCoast);
     bottomMotor.setIdleMode(IdleMode.kCoast);
     topPID = topMotor.getPIDController();
     bottomPID = bottomMotor.getPIDController();
-    topPID.setP(TOP_MOTOR_KP);
-    topPID.setI(TOP_MOTOR_KI);
-    topPID.setD(TOP_MOTOR_KD);
-    topFF = new SimpleMotorFeedforward(TOP_MOTOR_KS, TOP_MOTOR_KV, TOP_MOTOR_KA);
-    bottomPID.setP(BOTTOM_MOTOR_KP);
-    bottomPID.setI(BOTTOM_MOTOR_KI);
-    bottomPID.setD(BOTTOM_MOTOR_KD);
-    bottomFF = new SimpleMotorFeedforward(BOTTOM_MOTOR_KS, BOTTOM_MOTOR_KV, BOTTOM_MOTOR_KA);
+    bottomPID.setP(TOP_MOTOR_KP);
+    bottomPID.setI(TOP_MOTOR_KI);
+    bottomPID.setD(TOP_MOTOR_KD);
+    bottomPID.setFF(0.00015);
+    bottomFF = new SimpleMotorFeedforward(TOP_MOTOR_KS, TOP_MOTOR_KV, TOP_MOTOR_KA);
+    topPID.setP(BOTTOM_MOTOR_KP);
+    topPID.setI(BOTTOM_MOTOR_KI);
+    topPID.setD(BOTTOM_MOTOR_KD);
+    bottomPID.setFF(0.00015);
+    topFF = new SimpleMotorFeedforward(BOTTOM_MOTOR_KS, BOTTOM_MOTOR_KV, BOTTOM_MOTOR_KA);
 
 //#region sysid setup
     appliedTopVoltage = mutable(Volts.of(0));
@@ -118,11 +122,6 @@ public class Shooter extends SubsystemBase {
 
   public double GetShooterAverageRpm() {
     return (topMotor.getEncoder().getVelocity() + bottomMotor.getEncoder().getVelocity()) / 2;
-  }
-
-  public double GetApproxExitVelocity() {
-    // TODO: figure out rpm vs exit velo function for the shooter
-    return 0;
   }
 
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {

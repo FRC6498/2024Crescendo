@@ -1,35 +1,46 @@
 package frc.robot;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
-  TalonFX intakeMotor;
-  DigitalInput intakeSensor;
-  boolean hasPiece;
+  TalonFX MainIntakeMotor;
+  CANSparkMax ArmIntakeMotor;
+  DigitalInput ArmIntakeSensor;
+  public Trigger mainIntakeHasNote, armIntakeHasNote;
   public Intake() {
-    intakeMotor = new TalonFX(0);//TODO: get intake motor id
-    intakeSensor = new DigitalInput(1);
-    intakeMotor.setInverted(true);
+    MainIntakeMotor = new TalonFX(10);
+    ArmIntakeMotor = new CANSparkMax(18, MotorType.kBrushless);
+    ArmIntakeSensor = new DigitalInput(1);
+    MainIntakeMotor.setInverted(false);
+    ArmIntakeMotor.setInverted(true);
+    armIntakeHasNote = new Trigger(()-> !ArmIntakeSensor.get());
   }
-  public Command runAtPrecent(double percent) { return this.runOnce(()-> intakeMotor.set(percent)); }
-  public Command Run() {
-    if (hasPiece) {
-      return this.runOnce(()->intakeMotor.set(0));
-    }else{
-      return this.runOnce(()->intakeMotor.set(IntakeConstants.DEFAULT_INTAKE_SPEED));
-    }
+  public Command IntakeMain() {
+    return this.runOnce(()-> MainIntakeMotor.set(0.5));
   }
+  public Command IntakeArm() {
+    return this.runOnce(()-> ArmIntakeMotor.set(0.3));
+  }
+  public Command StopArmIntake() {
+    return this.runOnce(()-> ArmIntakeMotor.set(0));
+  }
+  public Command runAtPrecent(double percent) { return this.runOnce(()-> MainIntakeMotor.set(percent)); }
   public Command Reverse() { return runAtPrecent(-IntakeConstants.DEFAULT_INTAKE_SPEED); }
+  public Command ReverseArmIntake() {return this.runOnce(()-> ArmIntakeMotor.set(-0.2));}
   public Command stop() { return runAtPrecent(0); }
-  public boolean GetSensor() { return intakeSensor.get(); }
+  
   @Override
   public void periodic() {
-    SmartDashboard.putBoolean("inatake sensor state", intakeSensor.get());
+    SmartDashboard.putBoolean("intake sensor", !ArmIntakeSensor.get());
+
   }
 }

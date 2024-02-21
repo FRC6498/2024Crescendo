@@ -4,14 +4,12 @@
 
 package frc.robot;
 
-import java.security.spec.ECFieldF2m;
-import java.util.function.BooleanSupplier;
-
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -19,9 +17,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.TunerConstants;
 
 public class RobotContainer {
@@ -64,8 +62,11 @@ public class RobotContainer {
     climber = new Climber();
     shooterSub = new Shooter();
     armSub = new Arm();
+     NamedCommands.registerCommand("ShootSpeakerCommand", shoot());
+    NamedCommands.registerCommand("IntakeCommand", intakeToArm());
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
+   
     configureBindings();
   }
   private void configureBindings() {
@@ -101,20 +102,56 @@ public class RobotContainer {
         .withTargetDirection(drivetrain.getRobotToSpeakerRotation())
         ));
 //#endregion
+      //operator bumpers run the climber
     operatorController.leftBumper().onTrue(climber.Run()).onFalse(climber.Stop());
     operatorController.rightBumper().onTrue(climber.Reverse()).onFalse(climber.Stop());
-    operatorController.a().onTrue(intakeSub.Run()).onFalse(intakeSub.stop());
-    operatorController.b().onTrue(armSub.RotateToAbsoluteAngle(new Rotation2d(0.17))); // rotates arm to intake position
-    operatorController.x().onTrue(armSub.RotateToAbsoluteAngle(new Rotation2d(1.571))); // rotates arm to amp position
+      //operator A reverses the arm intake
+    operatorController.a().onTrue(intakeSub.ReverseArmIntake()).onFalse(intakeSub.StopArmIntake());
+      //operator Y runs the shooter wheels
+    operatorController.y().onTrue(shoot());
+      //operator B lowers the arm and runs both intakes
+    operatorController.b().onTrue(intakeToArm()).onFalse(intakeSub.stop().andThen(intakeSub.StopArmIntake()));
+      //operator X runs the arm intake
+    operatorController.x().onTrue(intakeSub.Reverse()).onFalse(intakeSub.stop());
+      //operator dpad up reverses the main intake
+    operatorController.pov(0).onTrue(Commands.runOnce(()-> {armSub.setGoal(0.05); armSub.enable();}, armSub));
+      //operator xpad right moves the arm up
+    operatorController.pov(90).onTrue(intakeSub.ReverseArmIntake()).onFalse(intakeSub.StopArmIntake());
+      //operator dpad down moves the arm down
+    operatorController.pov(180).onTrue(Commands.runOnce(()->{armSub.setGoal(0); armSub.enable();}));
 
-    armSub.setDefaultCommand(intakeToArm(intakeSub.GetSensor(), armSub.getArmAtBottom()));
+
+
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
     drivetrain.registerTelemetry(logger::telemeterize);
   }
-  private Command intakeToArm(Boolean intakeHasNote, Boolean armAtBottom) {
-    return armSub.runOnce(()-> armSub.IntakeArm()).onlyIf(()-> intakeHasNote && armAtBottom);
+  private Command intakeToArm() {
+      return 
+      Commands.runOnce(()-> {armSub.setGoal(0); armSub.enable();}).onlyIf(()-> armSub.getPosition() > 0)
+        .until(()-> armSub.getPosition() == 0)
+        .andThen(intakeSub.IntakeMain())
+        .andThen(intakeSub.IntakeArm())
+        .andThen(
+          ()->intakeSub.armIntakeHasNote.onTrue(
+            intakeSub.stop()
+            .andThen(intakeSub.StopArmIntake())
+            )
+        );
+        
+  }
+  private Command shoot() {
+    return 
+    Commands.runOnce(()->{armSub.setGoal(0.025); armSub.enable();}, armSub)
+    .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
+    .andThen(shooterSub.RunAtVelocity(130))
+        .andThen(new WaitCommand(1))
+    .andThen(intakeSub.IntakeArm())
+    .andThen(new WaitCommand(1))
+    .andThen(intakeSub.StopArmIntake())
+    .andThen(shooterSub.stop())
+    .andThen(Commands.runOnce(()->{armSub.setGoal(0); armSub.enable();}, armSub));
   }
   public Command getAutonomousCommand() {
    return autoChooser.getSelected();

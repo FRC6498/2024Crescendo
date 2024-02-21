@@ -11,7 +11,7 @@ public class Climber extends SubsystemBase {
   public Climber() {
     LeftClimberMotor = new TalonFX(20);
     RightClimberMotor = new TalonFX(14);
-    climberSensor = new DigitalInput(0); // TODO: get climber sensor port
+    climberSensor = new DigitalInput(3);
   }
   public Command Run(){
     return this.run(
