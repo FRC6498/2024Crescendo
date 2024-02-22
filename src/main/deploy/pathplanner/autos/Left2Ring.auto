@@ -30,12 +30,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "IntakeCommand"
-          }
-        },
-        {
           "type": "wait",
           "data": {
             "waitTime": 1.0

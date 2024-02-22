@@ -30,12 +30,6 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "IntakeCommand"
-          }
-        },
-        {
           "type": "wait",
           "data": {
             "waitTime": 0.5
@@ -63,12 +57,6 @@
           "type": "path",
           "data": {
             "pathName": "RightToRingBehind"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "IntakeCommand"
           }
         },
         {
