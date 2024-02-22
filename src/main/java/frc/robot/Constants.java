@@ -18,6 +18,7 @@ public final class Constants {
         public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
         public static final int BLUE_SPEAKER_TAG_ID = 4;//TODO:check if blue tag ids are right
         public static final int RED_SPEAKER_TAG_ID = 8;
+        public static final int SPEAKER_HEIGHT = 2; // speaker height in m
     }
     public static final class IntakeConstants{
         /**Speed that the intake will run at unless directly overridden by the runAtPercent command */
@@ -38,7 +39,10 @@ public final class Constants {
         public static final double BOTTOM_MOTOR_KS = 0.12187;
         public static final double BOTTOM_MOTOR_KV = 0.12947;
         public static final double BOTTOM_MOTOR_KA = 0.032151;
-
+        public static double CalcShooterAngleFromDistance(double distanceToSpeakerMeters) {
+            // source -- trust me bro
+            return ((Math.PI/2) - Math.atan(FieldConstants.SPEAKER_HEIGHT / distanceToSpeakerMeters))/(2*Math.PI);
+        }
         public static final double DEFAULT_SHOOTER_SPEED = 0.75;
 
     }

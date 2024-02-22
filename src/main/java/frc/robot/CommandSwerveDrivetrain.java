@@ -12,6 +12,8 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
+import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -32,7 +34,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private double m_lastSimTime;
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
     //Vision vision;
-    
+
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
@@ -41,7 +43,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        
+
     }
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
@@ -50,7 +52,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        
+
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
@@ -88,27 +90,28 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                                             driveBaseRadius,
                                             new ReplanningConfig()),
             ()->false, // Change this if the path needs to be flipped on red vs blue
-            this); // Subsystem for requirements 
-    } 
-   
+            this); // Subsystem for requirements
+    }
+
     public ChassisSpeeds getCurrentRobotChassisSpeeds() {
         return m_kinematics.toChassisSpeeds(getState().ModuleStates);
     }
+    public double GetDistanceToSpeaker() {
+        // dist from robot pose to speaker pose
+        if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+            return m_odometry.getEstimatedPosition().getTranslation().getDistance(Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.BLUE_SPEAKER_TAG_ID).get().toPose2d().getTranslation());
+        }else {
+            return m_odometry.getEstimatedPosition().getTranslation().getDistance(Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.RED_SPEAKER_TAG_ID).get().toPose2d().getTranslation());
+        }
+    }
 
     public Rotation2d getRobotToSpeakerRotation() {
-        int speakerTagID;
-        if (DriverStation.getAlliance().isPresent()) {
-            if (DriverStation.getAlliance().get() == Alliance.Blue) {
-                speakerTagID = 7;
-            }else {
-                speakerTagID = 4;
-            }
+        if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+            return Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.BLUE_SPEAKER_TAG_ID).get().toPose2d().getRotation().minus(m_odometry.getEstimatedPosition().getRotation());
         }else{
-            //field at castle is setup as red 
-            speakerTagID = 4;
+            //field at castle is setup as red
+            return Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.RED_SPEAKER_TAG_ID).get().toPose2d().getRotation().minus(m_odometry.getEstimatedPosition().getRotation());
         }
-        return Constants.FieldConstants.FIELD_LAYOUT.getTagPose(speakerTagID).get().toPose2d()
-            .relativeTo(m_odometry.getEstimatedPosition()).getRotation();
     }
 
     public void periodic() {
@@ -116,8 +119,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         // if (visionEst.isPresent()){
             // m_odometry.addVisionMeasurement(visionEst.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
             // Commands.print("update");
-        // }  
+        // }
         // SmartDashboard.putNumber("SpeakerRotation", getRobotToSpeakerRotation().getDegrees());
     }
-    
+
 }

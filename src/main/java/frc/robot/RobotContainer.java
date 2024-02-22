@@ -66,7 +66,7 @@ public class RobotContainer {
     NamedCommands.registerCommand("IntakeCommand", intakeToArm());
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
-   
+
     configureBindings();
   }
   private void configureBindings() {
@@ -114,7 +114,7 @@ public class RobotContainer {
       //operator X runs the arm intake
     operatorController.x().onTrue(intakeSub.Reverse()).onFalse(intakeSub.stop());
       //operator dpad up reverses the main intake
-    operatorController.pov(0).onTrue(Commands.runOnce(()-> {armSub.setGoal(0.05); armSub.enable();}, armSub));
+    operatorController.pov(0).onTrue(Commands.runOnce(()-> {armSub.setGoal(Constants.ShooterConstants.CalcShooterAngleFromDistance(drivetrain.GetDistanceToSpeaker())); armSub.enable();}, armSub));
       //operator xpad right moves the arm up
     operatorController.pov(90).onTrue(intakeSub.ReverseArmIntake()).onFalse(intakeSub.StopArmIntake());
       //operator dpad down moves the arm down
@@ -128,7 +128,7 @@ public class RobotContainer {
     drivetrain.registerTelemetry(logger::telemeterize);
   }
   private Command intakeToArm() {
-      return 
+      return
       Commands.runOnce(()-> {armSub.setGoal(0); armSub.enable();}).onlyIf(()-> armSub.getPosition() > 0)
         .until(()-> armSub.getPosition() == 0)
         .andThen(intakeSub.IntakeMain())
@@ -139,10 +139,10 @@ public class RobotContainer {
             .andThen(intakeSub.StopArmIntake())
             )
         );
-        
+
   }
   private Command shoot() {
-    return 
+    return
     Commands.runOnce(()->{armSub.setGoal(0.025); armSub.enable();}, armSub)
     .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
     .andThen(shooterSub.RunAtVelocity(130))
