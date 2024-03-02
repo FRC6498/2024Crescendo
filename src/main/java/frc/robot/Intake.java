@@ -37,10 +37,13 @@ public class Intake extends SubsystemBase {
   public Command Reverse() { return runAtPrecent(-IntakeConstants.DEFAULT_INTAKE_SPEED); }
   public Command ReverseArmIntake() {return this.runOnce(()-> ArmIntakeMotor.set(-0.2));}
   public Command stop() { return runAtPrecent(0); }
+  public Boolean getIntakeSensor() {
+    return !ArmIntakeSensor.get();
+  }
   
   @Override
   public void periodic() {
     SmartDashboard.putBoolean("intake sensor", !ArmIntakeSensor.get());
-
+    
   }
 }

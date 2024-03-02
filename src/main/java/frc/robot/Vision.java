@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import java.util.Optional;
@@ -52,7 +48,6 @@ public class Vision extends SubsystemBase {
     }else{
       return null;
     }
-    
   }
   public double getCurrentTimeStamp() {
     return pipelineResult.getTimestampSeconds();
@@ -62,7 +57,6 @@ public class Vision extends SubsystemBase {
     //basic pythagorean therom
     return Math.sqrt(Math.pow(robotToSpeakerTransform.getX(), 2) + Math.pow(robotToSpeakerTransform.getY(), 2));
   }
-
   @Override
   public void periodic() {
     if (mainCam.getLatestResult().hasTargets()) {

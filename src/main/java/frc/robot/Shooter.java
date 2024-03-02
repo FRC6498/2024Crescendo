@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import static edu.wpi.first.units.MutableMeasure.mutable;
@@ -44,8 +40,6 @@ public class Shooter extends SubsystemBase {
     bottomMotor = new CANSparkMax(17, MotorType.kBrushless);
     topMotor.setInverted(false);
     bottomMotor.setInverted(false);
-
-
     topMotor.getEncoder().setPosition(0);
     bottomMotor.getEncoder().setPosition(0);
     topMotor.setIdleMode(IdleMode.kCoast);
@@ -62,7 +56,6 @@ public class Shooter extends SubsystemBase {
     topPID.setD(BOTTOM_MOTOR_KD);
     bottomPID.setFF(0.00015);
     topFF = new SimpleMotorFeedforward(BOTTOM_MOTOR_KS, BOTTOM_MOTOR_KV, BOTTOM_MOTOR_KA);
-
 //#region sysid setup
     appliedTopVoltage = mutable(Volts.of(0));
     topDistance = mutable(Rotations.of(0));
@@ -91,19 +84,11 @@ public class Shooter extends SubsystemBase {
             }, this));
 //#endregion
   }
-
-  /**
-   * Runs the shooter motors at different velocitys
-   *
-   * @param topMotorVelocity
-   * @param bottomMotorVelocity
-   * @return
-   */
   public Command RunAtVelocity(double topMotorVelocity, double bottomMotorVelocity) {
-    return this.runOnce(() -> topPID.setReference(topMotorVelocity, ControlType.kVelocity))
+        return this.runOnce(() -> topPID.setReference(topMotorVelocity, ControlType.kVelocity, 0, topFF.calculate(topMotorVelocity)))
         .andThen(
-            this.runOnce(() -> bottomPID.setReference(bottomMotorVelocity, ControlType.kVelocity))
-        );
+            this.runOnce(
+                () -> bottomPID.setReference(bottomMotorVelocity, ControlType.kVelocity, 0, bottomFF.calculate(bottomMotorVelocity))));
   }
   public Command RunAtVelocity(double velocity) {
     return this.runOnce(() -> topPID.setReference(velocity, ControlType.kVelocity, 0, topFF.calculate(velocity)))
@@ -111,31 +96,25 @@ public class Shooter extends SubsystemBase {
             this.runOnce(
                 () -> bottomPID.setReference(velocity, ControlType.kVelocity, 0, bottomFF.calculate(velocity))));
   }
-
   public Command Run() {
     return this.runOnce(() -> topMotor.set(DEFAULT_SHOOTER_SPEED)).andThen(() -> bottomMotor.set(DEFAULT_SHOOTER_SPEED));
   }
-
   public Command stop() {
     return this.runOnce(() -> topMotor.set(0)).andThen(() -> bottomMotor.set(0));
   }
-
   public double GetShooterAverageRpm() {
     return (topMotor.getEncoder().getVelocity() + bottomMotor.getEncoder().getVelocity()) / 2;
   }
-
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
     topMotor.getEncoder().setPosition(0);
     bottomMotor.getEncoder().setPosition(0);
     return routine.quasistatic(direction);
   }
-
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
     topMotor.getEncoder().setPosition(0);
     bottomMotor.getEncoder().setPosition(0);
     return routine.dynamic(direction);
   }
-
   @Override
   public void periodic() {
 
