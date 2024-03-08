@@ -7,6 +7,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.IntakeConstants;
@@ -16,6 +17,7 @@ public class Intake extends SubsystemBase {
   CANSparkMax ArmIntakeMotor;
   DigitalInput ArmIntakeSensor;
   public Trigger mainIntakeHasNote, armIntakeHasNote;
+  public boolean intakeHasNote = false;
   public Intake() {
     MainIntakeMotor = new TalonFX(10);
     ArmIntakeMotor = new CANSparkMax(18, MotorType.kBrushless);
@@ -27,8 +29,15 @@ public class Intake extends SubsystemBase {
   public Command IntakeMain() {
     return this.runOnce(()-> MainIntakeMotor.set(0.5));
   }
+  public Command RunIntakes() {
+    return this.runOnce(()-> {ArmIntakeMotor.set(0.3); MainIntakeMotor.set(0.3);});
+  }
+  public Command StopIntakes() {
+        return this.runOnce(()-> {ArmIntakeMotor.set(0); MainIntakeMotor.set(0);});
+
+  }
   public Command IntakeArm() {
-    return this.runOnce(()-> ArmIntakeMotor.set(0.3));
+    return this.runOnce(()-> ArmIntakeMotor.set(0.3)).until(armIntakeHasNote);
   }
   public Command StopArmIntake() {
     return this.runOnce(()-> ArmIntakeMotor.set(0));
@@ -43,7 +52,7 @@ public class Intake extends SubsystemBase {
   
   @Override
   public void periodic() {
-    SmartDashboard.putBoolean("intake sensor", !ArmIntakeSensor.get());
-    
+    intakeHasNote = !ArmIntakeSensor.get();
+    SmartDashboard.putBoolean("intake sensor", intakeHasNote);
   }
 }

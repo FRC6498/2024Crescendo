@@ -33,12 +33,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
-    // Vision vision;
+    Vision vision;
 
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
-        // vision = new Vision();
+        vision = new Vision();
         configurePathPlanner();
         if (Utils.isSimulation()) {
             startSimThread();
@@ -47,7 +47,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
-        // vision = new Vision();
+        vision = new Vision();
         configurePathPlanner();
         if (Utils.isSimulation()) {
             startSimThread();
@@ -115,11 +115,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     public void periodic() {
-        // var visionEst = vision.updatePoseEstimator();
-        // if (visionEst.isPresent()){
-            // m_odometry.addVisionMeasurement(visionEst.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
-            // Commands.print("update");
-        // }
+        var visionEst = vision.updatePoseEstimator();
+        if (visionEst.isPresent()){
+            m_odometry.addVisionMeasurement(visionEst.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
+        }
         // SmartDashboard.putNumber("SpeakerRotation", getRobotToSpeakerRotation().getDegrees());
     }
 

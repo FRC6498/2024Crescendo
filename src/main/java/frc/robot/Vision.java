@@ -17,7 +17,7 @@ import frc.robot.Constants.VisionConstants;
 public class Vision extends SubsystemBase {
   /** Creates a new Vision. */
   private final PhotonCamera mainCam;
-  private PhotonPipelineResult pipelineResult;
+  public PhotonPipelineResult pipelineResult;
   private final PhotonPoseEstimator visionPoseEstimator;
   public Optional<EstimatedRobotPose> currentEstimatedPose;
   public double lastTimestamp = 0;
@@ -50,7 +50,11 @@ public class Vision extends SubsystemBase {
     }
   }
   public double getCurrentTimeStamp() {
-    return pipelineResult.getTimestampSeconds();
+    if (pipelineResult != null) {
+      return pipelineResult.getTimestampSeconds();
+    }else{
+      return -1;
+    }
   }
   public double GetRobotToSpeakerDistance() {
     Transform3d robotToSpeakerTransform = GetRobotToSpeakerTransform();
@@ -59,9 +63,9 @@ public class Vision extends SubsystemBase {
   }
   @Override
   public void periodic() {
-    if (mainCam.getLatestResult().hasTargets()) {
-      pipelineResult = mainCam.getLatestResult();
-      currentEstimatedPose = visionPoseEstimator.update(pipelineResult, mainCam.getCameraMatrix(), mainCam.getDistCoeffs());
-    }
+    // if (mainCam.getLatestResult().hasTargets()) {
+      // pipelineResult = mainCam.getLatestResult();
+      // currentEstimatedPose = visionPoseEstimator.update(pipelineResult, mainCam.getCameraMatrix(), mainCam.getDistCoeffs());
+    // }
   }
 }

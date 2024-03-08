@@ -12,11 +12,11 @@ import edu.wpi.first.math.util.Units;
 /** Add your docs here. */
 public final class Constants {
     public static final class VisionConstants{
-       public static final Transform3d ROBOT_TO_CAMERA = new Transform3d(new Translation3d(Units.inchesToMeters(8), 0, Units.inchesToMeters(8.125)), new Rotation3d(0, 0, 0));//TODO: Get the robot to camera transform
+       public static final Transform3d ROBOT_TO_CAMERA = new Transform3d(new Translation3d(Units.inchesToMeters(11.5), 0, Units.inchesToMeters(-0.5)), new Rotation3d(0, 0.4, 0));
     }
     public static final class FieldConstants{
         public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
-        public static final int BLUE_SPEAKER_TAG_ID = 4;//TODO:check if blue tag ids are right
+        public static final int BLUE_SPEAKER_TAG_ID = 4;
         public static final int RED_SPEAKER_TAG_ID = 8;
         public static final int SPEAKER_HEIGHT = 2; // speaker height in m
     }
