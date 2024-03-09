@@ -118,7 +118,11 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         var visionEst = vision.updatePoseEstimator();
         if (visionEst.isPresent()){
             m_odometry.addVisionMeasurement(visionEst.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
+            Commands.print("update");
+        }else{
+            Commands.print("no data");
         }
+        SmartDashboard.putNumber("calculated ", Constants.ShooterConstants.CalcShooterAngleFromDistance(GetDistanceToSpeaker()));
         // SmartDashboard.putNumber("SpeakerRotation", getRobotToSpeakerRotation().getDegrees());
     }
 

@@ -87,7 +87,7 @@ public class Shooter extends SubsystemBase {
   public Command RunAtVelocity(double topMotorVelocity, double bottomMotorVelocity) {
         return this.runOnce(() -> topPID.setReference(topMotorVelocity, ControlType.kVelocity, 0, topFF.calculate(topMotorVelocity)))
         .andThen(
-            this.runOnce(
+            this.run(
                 () -> bottomPID.setReference(bottomMotorVelocity, ControlType.kVelocity, 0, bottomFF.calculate(bottomMotorVelocity))));
   }
   public Command RunAtVelocity(double velocity) {

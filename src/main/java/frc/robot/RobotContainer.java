@@ -10,14 +10,10 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.generated.TunerConstants;
@@ -63,8 +59,8 @@ public class RobotContainer {
     shooterSub = new Shooter();
     armSub = new Arm();
     CameraServer.startAutomaticCapture();
-     NamedCommands.registerCommand("ShootSpeakerCommand", ShootSpeakerClose());
-    NamedCommands.registerCommand("IntakeCommand", intakeToArm());
+    NamedCommands.registerCommand("ShootSpeakerCommand", ShootSpeakerClose());
+    NamedCommands.registerCommand("IntakeCommand", intakeToArmAuto());
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
 
@@ -111,7 +107,7 @@ public class RobotContainer {
       //operator Y runs the shooter wheels
     operatorController.y().onTrue(ShootSpeaker());
       //operator B lowers the arm and runs both intakes
-    operatorController.b().onTrue(intakeToArm()).onFalse(intakeSub.stop().andThen(intakeSub.StopArmIntake()));
+    operatorController.b().onTrue(intakeToArmAuto()).onFalse(intakeSub.stop().andThen(intakeSub.StopArmIntake()));
       //operator X runs the arm intake
     operatorController.x().onTrue(ShootSpeakerClose());
       //operator dpad up reverses the main intake
@@ -119,21 +115,15 @@ public class RobotContainer {
       //operator xpad right moves the arm up
     operatorController.pov(90).onTrue(ShootAmp());
       //operator dpad down moves the arm down
-    operatorController.pov(180).onTrue(Commands.runOnce(()->{armSub.setGoal(0); armSub.enable();}));
+    operatorController.pov(180).onTrue(Commands.runOnce(()->{armSub.setGoal(0);}, armSub));
 
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
     drivetrain.registerTelemetry(logger::telemeterize);
   }
-
-  private Command intakeToArm() {
-    return new FunctionalCommand(()->intakeSub.RunIntakes(), ()->intakeSub.RunIntakes(), interuppted->intakeSub.StopIntakes(), intakeSub.armIntakeHasNote, intakeSub);
-  }
   private Command intakeToArmAuto() {
-      return
-        intakeSub.IntakeMain()
-        .andThen(intakeSub.IntakeArm().until(()->intakeSub.intakeHasNote))
+      return intakeSub.RunIntakes().until(()->intakeSub.intakeHasNote)
         .andThen(intakeSub.StopArmIntake())
         .andThen(intakeSub.stop());
   }
@@ -141,6 +131,20 @@ public class RobotContainer {
     return
     intakeSub.IntakeMain().andThen(
     Commands.runOnce(()->{armSub.setGoal(0.07); armSub.enable();}, armSub))
+    .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
+    .andThen(shooterSub.RunAtVelocity(130))
+    .andThen(new WaitCommand(1))
+    .andThen(intakeSub.IntakeArm())
+    .andThen(new WaitCommand(1))
+    .andThen(intakeSub.StopArmIntake())
+    .andThen(intakeSub.stop())
+    .andThen(shooterSub.stop())
+    .andThen(Commands.runOnce(()->{armSub.setGoal(0); armSub.enable();}, armSub));
+  }
+  private Command ShootSpeakerDistance(double rotations) {
+    return
+    intakeSub.IntakeMain().andThen(
+    Commands.runOnce(()->{armSub.setGoal(rotations); armSub.enable();}, armSub))
     .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
     .andThen(shooterSub.RunAtVelocity(130))
     .andThen(new WaitCommand(1))
@@ -166,10 +170,10 @@ public class RobotContainer {
   
   private Command ShootAmp() {
     return intakeSub.IntakeMain().andThen(
-    Commands.runOnce(()->{armSub.setGoal(0.22); armSub.enable();}, armSub))
-    .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
-    .andThen(shooterSub.RunAtVelocity(130))
-    .andThen(new WaitCommand(1))
+    Commands.runOnce(()->{armSub.setGoal(0.25); armSub.enable();}, armSub))
+    .andThen(shooterSub.RunAtVelocity(40).until(()-> Math.abs(10 - shooterSub.GetShooterAverageRpm()) < 10))
+    .andThen(shooterSub.RunAtVelocity(40))
+    .andThen(new WaitCommand(1.2))
     .andThen(intakeSub.IntakeArm())
     .andThen(new WaitCommand(1))
     .andThen(intakeSub.StopArmIntake())

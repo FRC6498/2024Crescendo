@@ -35,6 +35,7 @@ public class Arm extends ProfiledPIDSubsystem {
     armCoder = new CANcoder(44);
     armFeedforward = new ArmFeedforward(Constants.ArmConstants.ARM_KS, Constants.ArmConstants.ARM_KG, Constants.ArmConstants.ARM_KV);
     armCoder.setPosition(0);
+    
   }
 
   @Override
@@ -51,6 +52,7 @@ public class Arm extends ProfiledPIDSubsystem {
   public double getMeasurement() {
     double position = armCoder.getPosition().getValue();
     SmartDashboard.putNumber("get arm pos", position);
+    SmartDashboard.putBoolean("arm limit", LeftArmMotor.getFault_ReverseHardLimit().getValue());
     return position;
   }
 }

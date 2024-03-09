@@ -30,7 +30,7 @@ public class Intake extends SubsystemBase {
     return this.runOnce(()-> MainIntakeMotor.set(0.5));
   }
   public Command RunIntakes() {
-    return this.runOnce(()-> {ArmIntakeMotor.set(0.3); MainIntakeMotor.set(0.3);});
+    return this.run(()-> {ArmIntakeMotor.set(0.3); MainIntakeMotor.set(0.3);});
   }
   public Command StopIntakes() {
         return this.runOnce(()-> {ArmIntakeMotor.set(0); MainIntakeMotor.set(0);});
