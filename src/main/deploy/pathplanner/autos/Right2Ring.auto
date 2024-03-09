@@ -36,12 +36,6 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "LeftRingToLeft"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "ShootSpeakerCommand"

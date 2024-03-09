@@ -30,12 +30,6 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "MiddleRingToMiddle"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "ShootSpeakerCommand"

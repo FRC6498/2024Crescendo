@@ -15,7 +15,6 @@ import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -92,7 +91,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             ()->false, // Change this if the path needs to be flipped on red vs blue
             this); // Subsystem for requirements
     }
-
     public ChassisSpeeds getCurrentRobotChassisSpeeds() {
         return m_kinematics.toChassisSpeeds(getState().ModuleStates);
     }
@@ -118,9 +116,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         var visionEst = vision.updatePoseEstimator();
         if (visionEst.isPresent()){
             m_odometry.addVisionMeasurement(visionEst.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
-            Commands.print("update");
+            SmartDashboard.putString("Drive-Vision update", "good update");
         }else{
-            Commands.print("no data");
+            SmartDashboard.putString("Drive-Vision update", "no update");
         }
         SmartDashboard.putNumber("calculated ", Constants.ShooterConstants.CalcShooterAngleFromDistance(GetDistanceToSpeaker()));
         // SmartDashboard.putNumber("SpeakerRotation", getRobotToSpeakerRotation().getDegrees());
