@@ -11,8 +11,15 @@ public class Leds extends SubsystemBase {
   double phase, ledSpeed;
   public Leds() {
     leds = new AddressableLED(0);
+    // symmetrical on robot
+    // 33 per side panel
+    // 14 per eye
     leds.setLength(Constants.LedConstants.LED_LENGTH);
     ledBuffer = new AddressableLEDBuffer(Constants.LedConstants.LED_LENGTH);
+    leds.setData(ledBuffer);
+    for (int i = 0; i < Constants.LedConstants.LED_LENGTH; i++) {
+      ledBuffer.setRGB(i, 255, 255, 255);
+    }
     leds.start();
   }
   public Command StopLeds() {
@@ -21,7 +28,7 @@ public class Leds extends SubsystemBase {
   public Command StartLeds() {
     return this.runOnce(()->leds.start());
   }
-  @Override
+  @Override  
   public void periodic() {
     phase += ledSpeed;
     if (phase >= Math.PI*2){

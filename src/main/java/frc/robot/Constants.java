@@ -12,12 +12,12 @@ import edu.wpi.first.math.util.Units;
 /** Add your docs here. */
 public final class Constants {
     public static final class VisionConstants{
-       public static final Transform3d ROBOT_TO_CAMERA = new Transform3d(new Translation3d(Units.inchesToMeters(11.5), 0, Units.inchesToMeters(-0.5)), new Rotation3d(0, 0.4, 0));
+       public static final Transform3d ROBOT_TO_CAMERA = new Transform3d(new Translation3d(Units.inchesToMeters(11.5), 0, Units.inchesToMeters(-0.5)), new Rotation3d(0, 0.4, Math.PI));
     }
     public static final class FieldConstants{
         public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
         public static final int BLUE_SPEAKER_TAG_ID = 4;
-        public static final int RED_SPEAKER_TAG_ID = 8;
+        public static final int RED_SPEAKER_TAG_ID = 4;
         public static final int SPEAKER_HEIGHT = 2; // speaker height in m
     }
     public static final class IntakeConstants{
@@ -40,14 +40,18 @@ public final class Constants {
         public static final double BOTTOM_MOTOR_KV = 0.12947;
         public static final double BOTTOM_MOTOR_KA = 0.032151;
         public static double CalcShooterAngleFromDistance(double distanceToSpeakerMeters) {
-            // source -- trust me bro
-            return ((Math.PI/2) - Math.atan(FieldConstants.SPEAKER_HEIGHT / distanceToSpeakerMeters))/(2*Math.PI);
+            double val =(0.035*distanceToSpeakerMeters) - 0.0033; 
+            if (val > 0.2) {
+                return 0.2;
+            }else{
+                return val;
+            }
         }
         public static final double DEFAULT_SHOOTER_SPEED = 0.75;
 
     }
     public static final class LedConstants {
-        public static final int LED_LENGTH = 1;
+        public static final int LED_LENGTH = 93;
     }
     public static final class ArmConstants {
         // TODO: config arm constants

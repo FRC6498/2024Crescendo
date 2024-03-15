@@ -14,7 +14,9 @@ import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
@@ -42,7 +44,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
-
+        resetPose();
     }
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
@@ -51,7 +53,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
-
+        resetPose();
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
@@ -111,17 +113,27 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             return Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.RED_SPEAKER_TAG_ID).get().toPose2d().getRotation().minus(m_odometry.getEstimatedPosition().getRotation());
         }
     }
-
-    public void periodic() {
-        var visionEst = vision.updatePoseEstimator();
-        if (visionEst.isPresent()){
-            m_odometry.addVisionMeasurement(visionEst.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
-            SmartDashboard.putString("Drive-Vision update", "good update");
-        }else{
-            SmartDashboard.putString("Drive-Vision update", "no update");
+    public void resetPose() {
+        var update = vision.updatePoseEstimator(m_odometry.getEstimatedPosition());
+        if (update.isPresent()) {
+            m_odometry.resetPosition(m_fieldRelativeOffset, m_modulePositions, update.get().estimatedPose.toPose2d());
         }
-        SmartDashboard.putNumber("calculated ", Constants.ShooterConstants.CalcShooterAngleFromDistance(GetDistanceToSpeaker()));
-        // SmartDashboard.putNumber("SpeakerRotation", getRobotToSpeakerRotation().getDegrees());
+
+    }
+    public Field2d field = new Field2d();
+    public double getCalculatedAngle() {
+        return Constants.ShooterConstants.CalcShooterAngleFromDistance(GetDistanceToSpeaker())-.22;
+    }
+    public void periodic() {
+        var update = vision.updatePoseEstimator(m_odometry.getEstimatedPosition());
+        if (update.isPresent()) {
+            m_odometry.addVisionMeasurement(update.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
+            field.setRobotPose(update.get().estimatedPose.toPose2d());
+            SmartDashboard.putData(field);
+        }
+        SmartDashboard.putNumber("calculated ", (Constants.ShooterConstants.CalcShooterAngleFromDistance(GetDistanceToSpeaker())));
+        SmartDashboard.putNumber("speaker dist ", GetDistanceToSpeaker());
+
     }
 
 }

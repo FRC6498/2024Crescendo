@@ -49,6 +49,7 @@ public class RobotContainer {
   private final Climber climber;
   private final Shooter shooterSub;
   private final Arm armSub;
+  private final Leds ledSub;
   public RobotContainer() {
    
     driverController = new CommandXboxController(0);
@@ -57,21 +58,23 @@ public class RobotContainer {
     intakeSub = new Intake();
     climber = new Climber();
     shooterSub = new Shooter();
+    ledSub = new Leds();
     armSub = new Arm();
     NamedCommands.registerCommand("ShootSpeakerCommand", ShootSpeakerClose());
     NamedCommands.registerCommand("IntakeCommand", intakeToArmAuto());
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
-
+    ledSub.setDefaultCommand(ledSub.StartLeds());
     configureBindings();
   }
   private void configureBindings() {
     //#region drive commands
+
     //* drive fieldcentric by default */
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
         drivetrain.applyRequest(() -> FieldCentricDrive
-          .withVelocityX(-driverController.getLeftY() * MaxSpeed)
-          .withVelocityY(-driverController.getLeftX() * MaxSpeed)
+          .withVelocityX(driverController.getLeftY() * MaxSpeed)
+          .withVelocityY(driverController.getLeftX() * MaxSpeed)
           .withRotationalRate(-driverController.getRightX() * MaxAngularRate)
         ));
     //* brake the drive motors */
@@ -80,17 +83,18 @@ public class RobotContainer {
     driverController.x().whileTrue(drivetrain.run(()->
       drivetrain.applyRequest(
           () -> FieldCentricDrive
-          .withVelocityX(-driverController.getLeftY() * MaxSpeed)
-          .withVelocityY(-driverController.getLeftX() * MaxSpeed)
+          .withVelocityX(driverController.getLeftY() * MaxSpeed)
+          .withVelocityY(driverController.getLeftX() * MaxSpeed)
           .withRotationalRate(-driverController.getRightX() * MaxAngularRate)
           )
         )
       );
     driverController.a().onTrue(drivetrain.run(()-> drivetrain.applyRequest(
       ()-> RobotCentricDrive
-        .withVelocityX(-driverController.getLeftY() * MaxSpeed)
-        .withVelocityY(-driverController.getLeftX() * MaxSpeed)
+        .withVelocityX(driverController.getLeftY() * MaxSpeed)
+        .withVelocityY(driverController.getLeftX() * MaxSpeed)
         .withRotationalRate(-driverController.getRightX() * MaxAngularRate))));
+    driverController.y().toggleOnTrue(Commands.run(()->{armSub.setGoal(drivetrain.getCalculatedAngle()); armSub.enable();}, armSub));
 //#endregion
       //operator bumpers run the climber
     operatorController.leftBumper().onTrue(climber.Run()).onFalse(climber.Stop());
@@ -100,7 +104,7 @@ public class RobotContainer {
      //operator B lowers the arm and runs both intakes
     operatorController.b().onTrue(intakeToArmAuto()).onFalse(intakeSub.stop().andThen(intakeSub.StopArmIntake()));
     //operator X runs the arm intake
-    operatorController.x().onTrue(ShootSpeakerClose());
+    operatorController.x().onTrue(ShootSpeakerDistance());
       //operator Y runs the shooter wheels
     operatorController.y().onTrue(ShootSpeaker());
       //operator dpad up reverses the main intake
@@ -127,8 +131,8 @@ public class RobotContainer {
   private Command ShootSpeaker() {
     return
     intakeSub.IntakeMain().andThen(
-    Commands.runOnce(()->{armSub.setGoal(0.07); armSub.enable();}, armSub))
-    .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
+    Commands.runOnce(()->{armSub.setGoal(0.1 /* rotations */); armSub.enable();}, armSub))
+    .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10) /* prob broken */)
     .andThen(shooterSub.RunAtVelocity(130))
     .andThen(new WaitCommand(1))
     .andThen(intakeSub.IntakeArm())
@@ -138,13 +142,13 @@ public class RobotContainer {
     .andThen(shooterSub.stop())
     .andThen(Commands.runOnce(()->{armSub.setGoal(0); armSub.enable();}, armSub));
   }
-  private Command ShootSpeakerDistance(double rotations) {
+  private Command ShootSpeakerDistance() {
     return
     intakeSub.IntakeMain().andThen(
-    Commands.runOnce(()->{armSub.setGoal(rotations); armSub.enable();}, armSub))
+    Commands.runOnce(()->{armSub.setGoal(Constants.ShooterConstants.CalcShooterAngleFromDistance(drivetrain.GetDistanceToSpeaker())); armSub.enable();}, armSub))
     .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
     .andThen(shooterSub.RunAtVelocity(130))
-    .andThen(new WaitCommand(1))
+    .andThen(new WaitCommand(2))
     .andThen(intakeSub.IntakeArm())
     .andThen(new WaitCommand(1))
     .andThen(intakeSub.StopArmIntake())
@@ -180,6 +184,7 @@ public class RobotContainer {
     .andThen(shooterSub.stop())
     .andThen(Commands.runOnce(()->{armSub.setGoal(0); armSub.enable();}, armSub));
   }
+
   public Command getAutonomousCommand() {
    return autoChooser.getSelected();
   }

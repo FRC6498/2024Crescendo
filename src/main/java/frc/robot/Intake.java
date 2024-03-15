@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -24,20 +25,21 @@ public class Intake extends SubsystemBase {
     ArmIntakeSensor = new DigitalInput(1);
     MainIntakeMotor.setInverted(false);
     ArmIntakeMotor.setInverted(true);
+    ArmIntakeMotor.setIdleMode(IdleMode.kBrake);
     armIntakeHasNote = new Trigger(()-> !ArmIntakeSensor.get());
   }
   public Command IntakeMain() {
     return this.runOnce(()-> MainIntakeMotor.set(0.5));
   }
   public Command RunIntakes() {
-    return this.run(()-> {ArmIntakeMotor.set(0.3); MainIntakeMotor.set(0.3);});
+    return this.run(()-> {ArmIntakeMotor.set(0.6); MainIntakeMotor.set(0.6);});
   }
   public Command StopIntakes() {
         return this.runOnce(()-> {ArmIntakeMotor.set(0); MainIntakeMotor.set(0);});
 
   }
   public Command IntakeArm() {
-    return this.runOnce(()-> ArmIntakeMotor.set(0.3)).until(armIntakeHasNote);
+    return this.run(()-> ArmIntakeMotor.set(0.3)).until(armIntakeHasNote);
   }
   public Command StopArmIntake() {
     return this.runOnce(()-> ArmIntakeMotor.set(0));

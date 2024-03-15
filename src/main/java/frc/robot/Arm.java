@@ -47,7 +47,6 @@ public class Arm extends ProfiledPIDSubsystem {
     SmartDashboard.putNumber("ff", feedforward);
   }
   public double getPosition() {return armCoder.getPosition().getValueAsDouble();}
-
   @Override
   public double getMeasurement() {
     double position = armCoder.getPosition().getValue();
