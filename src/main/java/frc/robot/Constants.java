@@ -40,7 +40,7 @@ public final class Constants {
         public static final double BOTTOM_MOTOR_KV = 0.12947;
         public static final double BOTTOM_MOTOR_KA = 0.032151;
         public static double CalcShooterAngleFromDistance(double distanceToSpeakerMeters) {
-            double val =(0.035*distanceToSpeakerMeters) - 0.0033; 
+            double val =(-0.031*Math.pow(distanceToSpeakerMeters, 2)) + (.105*distanceToSpeakerMeters) - 0.1093; 
             if (val > 0.2) {
                 return 0.2;
             }else{

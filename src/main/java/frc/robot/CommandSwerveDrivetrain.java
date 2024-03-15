@@ -12,6 +12,8 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -20,6 +22,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.Subsystem;
@@ -118,9 +121,17 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (update.isPresent()) {
             m_odometry.resetPosition(m_fieldRelativeOffset, m_modulePositions, update.get().estimatedPose.toPose2d());
         }
-
     }
-    public Field2d field = new Field2d();
+    public double getSpeakerXDistChange() {
+        Pose2d speakerPose;
+        Pose2d robotPose = m_odometry.getEstimatedPosition();
+        if(DriverStation.getAlliance().get() == Alliance.Blue){
+            speakerPose = Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.BLUE_SPEAKER_TAG_ID).get().toPose2d();
+        }else {
+            speakerPose = Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.RED_SPEAKER_TAG_ID).get().toPose2d();
+        }
+        return speakerPose.getX() - robotPose.getX();
+    }
     public double getCalculatedAngle() {
         return Constants.ShooterConstants.CalcShooterAngleFromDistance(GetDistanceToSpeaker())-.22;
     }
@@ -128,11 +139,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         var update = vision.updatePoseEstimator(m_odometry.getEstimatedPosition());
         if (update.isPresent()) {
             m_odometry.addVisionMeasurement(update.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
-            field.setRobotPose(update.get().estimatedPose.toPose2d());
-            SmartDashboard.putData(field);
         }
         SmartDashboard.putNumber("calculated ", (Constants.ShooterConstants.CalcShooterAngleFromDistance(GetDistanceToSpeaker())));
         SmartDashboard.putNumber("speaker dist ", GetDistanceToSpeaker());
+        SmartDashboard.putNumber("calculated angle", Math.asin(getSpeakerXDistChange()/GetDistanceToSpeaker()));
 
     }
 
