@@ -5,7 +5,7 @@
       "x": 0.6777587794889373,
       "y": 4.332276285303912
     },
-    "rotation": -60.95356886322842
+    "rotation": -60.0
   },
   "command": {
     "type": "sequential",
@@ -18,33 +18,15 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "LeftToRingBehind"
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "ShootSpeakerCommand"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
           }
         }
       ]

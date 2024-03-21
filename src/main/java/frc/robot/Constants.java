@@ -12,7 +12,7 @@ import edu.wpi.first.math.util.Units;
 /** Add your docs here. */
 public final class Constants {
     public static final class VisionConstants{
-       public static final Transform3d ROBOT_TO_CAMERA = new Transform3d(new Translation3d(Units.inchesToMeters(11.5), 0, Units.inchesToMeters(-0.5)), new Rotation3d(0, 0.4, Math.PI));
+       public static final Transform3d ROBOT_TO_CAMERA = new Transform3d(new Translation3d(Units.inchesToMeters(11.5), Units.inchesToMeters(0),Units.inchesToMeters(4)), new Rotation3d(0, 0.4, Math.PI));
     }
     public static final class FieldConstants{
         public static final AprilTagFieldLayout FIELD_LAYOUT = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
@@ -40,18 +40,19 @@ public final class Constants {
         public static final double BOTTOM_MOTOR_KV = 0.12947;
         public static final double BOTTOM_MOTOR_KA = 0.032151;
         public static double CalcShooterAngleFromDistance(double distanceToSpeakerMeters) {
-            double val =(-0.031*Math.pow(distanceToSpeakerMeters, 2)) + (.105*distanceToSpeakerMeters) - 0.1093; 
+            double val =((-0.0151*Math.pow(distanceToSpeakerMeters, 2)) + (.1*distanceToSpeakerMeters)-.09) + 0.03; 
             if (val > 0.2) {
                 return 0.2;
-            }else{
+            }else if(val < 0) {
+                return 0;
+            } else {
                 return val;
             }
         }
         public static final double DEFAULT_SHOOTER_SPEED = 0.75;
-
     }
     public static final class LedConstants {
-        public static final int LED_LENGTH = 93;
+        public static final int LED_LENGTH = 120;
     }
     public static final class ArmConstants {
         // TODO: config arm constants

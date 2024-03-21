@@ -16,10 +16,10 @@ public class Leds extends SubsystemBase {
     // 14 per eye
     leds.setLength(Constants.LedConstants.LED_LENGTH);
     ledBuffer = new AddressableLEDBuffer(Constants.LedConstants.LED_LENGTH);
-    leds.setData(ledBuffer);
     for (int i = 0; i < Constants.LedConstants.LED_LENGTH; i++) {
-      ledBuffer.setRGB(i, 255, 255, 255);
+      ledBuffer.setRGB(i, 0, 0, 255);
     }
+    leds.setData(ledBuffer);
     leds.start();
   }
   public Command StopLeds() {

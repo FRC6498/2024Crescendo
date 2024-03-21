@@ -23,7 +23,7 @@ public class RobotContainer {
   private double MaxAngularRate = 1.5 * Math.PI;
   private final SendableChooser<Command> autoChooser;
   private final CommandXboxController driverController, operatorController;
-  private final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain;
+  public final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain;
 //#region Swerve drive commands
   private final SwerveRequest.FieldCentric FieldCentricDrive = new SwerveRequest.FieldCentric()
       .withDeadband(MaxSpeed * 0.1)
@@ -73,8 +73,8 @@ public class RobotContainer {
     //* drive fieldcentric by default */
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
         drivetrain.applyRequest(() -> FieldCentricDrive
-          .withVelocityX(driverController.getLeftY() * MaxSpeed)
-          .withVelocityY(driverController.getLeftX() * MaxSpeed)
+          .withVelocityX(-driverController.getLeftY() * MaxSpeed)
+          .withVelocityY(-driverController.getLeftX() * MaxSpeed)
           .withRotationalRate(-driverController.getRightX() * MaxAngularRate)
         ));
     //* brake the drive motors */
@@ -89,12 +89,12 @@ public class RobotContainer {
           )
         )
       );
-    driverController.a().onTrue(drivetrain.run(()-> drivetrain.applyRequest(
-      ()-> RobotCentricDrive
-        .withVelocityX(driverController.getLeftY() * MaxSpeed)
-        .withVelocityY(driverController.getLeftX() * MaxSpeed)
-        .withRotationalRate(-driverController.getRightX() * MaxAngularRate))));
-    driverController.y().toggleOnTrue(Commands.run(()->{armSub.setGoal(drivetrain.getCalculatedAngle()); armSub.enable();}, armSub));
+    driverController.a().onTrue(Commands.runOnce(()->drivetrain.resetPose(), drivetrain));
+    driverController.y().onTrue(drivetrain.applyRequest(() -> FieldCentricDrive
+          .withVelocityX(driverController.getLeftY() * MaxSpeed)
+          .withVelocityY(driverController.getLeftX() * MaxSpeed)
+          .withRotationalRate(-driverController.getRightX() * MaxAngularRate)
+        ));
 //#endregion
       //operator bumpers run the climber
     operatorController.leftBumper().onTrue(climber.Run()).onFalse(climber.Stop());
@@ -106,9 +106,11 @@ public class RobotContainer {
     //operator X runs the arm intake
     operatorController.x().onTrue(ShootSpeakerDistance());
       //operator Y runs the shooter wheels
-    operatorController.y().onTrue(ShootSpeaker());
+    operatorController.y().onTrue(ShootSpeakerClose());
       //operator dpad up reverses the main intake
     operatorController.pov(0).onTrue(ReverseAllIntakes()).onFalse(intakeSub.StopIntakes());
+
+    // operatorController.pov(90).onTrue(Commands.runOnce(()->{drivetrain.resetPose();}, drivetrain));
       //operator dpad down moves the arm down
     operatorController.pov(180).onTrue(resetArm());
 
@@ -121,17 +123,17 @@ public class RobotContainer {
       return intakeSub.RunIntakes().until(()->intakeSub.intakeHasNote)
         .andThen(intakeSub.StopArmIntake())
         .andThen(intakeSub.stop());
-  }
+        }
   public Command resetArm() {
     return Commands.runOnce(()-> {armSub.setGoal(0); armSub.enable();}, armSub).andThen(shooterSub.stop());
   }
   public Command ReverseAllIntakes() {
     return intakeSub.ReverseArmIntake().andThen(intakeSub.Reverse());
   }
-  private Command ShootSpeaker() {
+  private Command ShootSpeaker() { 
     return
     intakeSub.IntakeMain().andThen(
-    Commands.runOnce(()->{armSub.setGoal(0.1 /* rotations */); armSub.enable();}, armSub))
+    Commands.runOnce(()->{armSub.setGoal(0.075 /* rotations */); armSub.enable();}, armSub))
     .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10) /* prob broken */)
     .andThen(shooterSub.RunAtVelocity(130))
     .andThen(new WaitCommand(1))
@@ -148,9 +150,9 @@ public class RobotContainer {
     Commands.runOnce(()->{armSub.setGoal(Constants.ShooterConstants.CalcShooterAngleFromDistance(drivetrain.GetDistanceToSpeaker())); armSub.enable();}, armSub))
     .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
     .andThen(shooterSub.RunAtVelocity(130))
-    .andThen(new WaitCommand(2))
+    .andThen(new WaitCommand(1.5))
     .andThen(intakeSub.IntakeArm())
-    .andThen(new WaitCommand(1))
+    .andThen(new WaitCommand(0.75))
     .andThen(intakeSub.StopArmIntake())
     .andThen(intakeSub.stop())
     .andThen(shooterSub.stop())
@@ -164,7 +166,7 @@ public class RobotContainer {
     .andThen(shooterSub.RunAtVelocity(130))
     .andThen(new WaitCommand(1.5))
     .andThen(intakeSub.IntakeArm())
-    .andThen(new WaitCommand(1.5))
+    .andThen(new WaitCommand(0.75))
     .andThen(intakeSub.StopArmIntake())
     .andThen(intakeSub.stop())
     .andThen(shooterSub.stop())
@@ -178,7 +180,7 @@ public class RobotContainer {
     .andThen(shooterSub.RunAtVelocity(40))
     .andThen(new WaitCommand(1.2))
     .andThen(intakeSub.IntakeArm())
-    .andThen(new WaitCommand(1))
+    .andThen(new WaitCommand(0.75))
     .andThen(intakeSub.StopArmIntake())
     .andThen(intakeSub.stop())
     .andThen(shooterSub.stop())

@@ -18,9 +18,15 @@
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 0.5
+            "pathName": "MidToRingBehind"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootSpeakerCommand"
           }
         },
         {
@@ -30,57 +36,9 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "2ndFarMidRingToMidStart"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "ShootSpeakerCommand"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "MidToRingBehind"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.0
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "MiddleRingToMiddle"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "ShootSpeakerCommand"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
           }
         }
       ]

@@ -2,6 +2,8 @@ package frc.robot;
 
 import java.util.Optional;
 
+import javax.swing.text.html.Option;
+
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -32,8 +34,11 @@ public class Vision extends SubsystemBase {
   public Transform3d GetRobotToTagTransform(int tagId, Pose3d currentRobotPose) {
     return FieldConstants.FIELD_LAYOUT.getTagPose(tagId).get().minus(currentRobotPose);
   }  
-  public Optional<EstimatedRobotPose> updatePoseEstimator(Pose2d prevEstPose){
-    visionPoseEstimator.setReferencePose(prevEstPose);
+  public Optional<EstimatedRobotPose> updatePoseEstimator(){
+    return visionPoseEstimator.update();
+  }
+  public Optional<EstimatedRobotPose> updatePoseEstimatorNoPose(Pose2d prevPose){
+    visionPoseEstimator.setReferencePose(prevPose);
     return visionPoseEstimator.update();
   }
   public Transform3d GetRobotToSpeakerTransform() {

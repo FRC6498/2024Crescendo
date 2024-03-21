@@ -24,10 +24,10 @@ public class Climber extends SubsystemBase {
   }
   public Command Run(){
     return this.run(
-      ()-> RightClimberMotor.set(0.5));
+      ()-> RightClimberMotor.set(1));
   }
   public Command Reverse() {
-    return this.run(()-> RightClimberMotor.set(-.8)).until(()->RightClimberMotor.getPosition().getValue() < -273).andThen(Stop());
+    return this.run(()-> RightClimberMotor.set(-1)).until(()->RightClimberMotor.getPosition().getValue() < -273).andThen(Stop());
   }
   public Command Stop() {
     return this.runOnce(()-> RightClimberMotor.set(0));

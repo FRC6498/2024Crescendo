@@ -1,6 +1,9 @@
 package frc.robot;
 
+import java.util.Optional;
 import java.util.function.Supplier;
+
+import org.photonvision.EstimatedRobotPose;
 
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
@@ -15,6 +18,7 @@ import com.pathplanner.lib.util.ReplanningConfig;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -36,6 +40,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+    public Optional<EstimatedRobotPose> lastRobotPose;
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
     Vision vision;
 
@@ -47,7 +52,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        resetPose();
+        // resetPose();
     }
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
@@ -56,7 +61,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        resetPose();
+        // resetPose();
     }
 
     public Command applyRequest(Supplier<SwerveRequest> requestSupplier) {
@@ -101,11 +106,16 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
     public double GetDistanceToSpeaker() {
         // dist from robot pose to speaker pose
-        if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-            return m_odometry.getEstimatedPosition().getTranslation().getDistance(Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.BLUE_SPEAKER_TAG_ID).get().toPose2d().getTranslation());
-        }else {
-            return m_odometry.getEstimatedPosition().getTranslation().getDistance(Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.RED_SPEAKER_TAG_ID).get().toPose2d().getTranslation());
+        double distance = 0;
+        if (lastRobotPose.isPresent()) {
+             if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+                distance = lastRobotPose.get().estimatedPose.toPose2d().getTranslation().getDistance(Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.BLUE_SPEAKER_TAG_ID).get().toPose2d().getTranslation());
+            }else {
+                distance = lastRobotPose.get().estimatedPose.toPose2d().getTranslation().getDistance(Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.RED_SPEAKER_TAG_ID).get().toPose2d().getTranslation());
+            }
         }
+        return distance;
+       
     }
 
     public Rotation2d getRobotToSpeakerRotation() {
@@ -117,10 +127,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
     }
     public void resetPose() {
-        var update = vision.updatePoseEstimator(m_odometry.getEstimatedPosition());
-        if (update.isPresent()) {
-            m_odometry.resetPosition(m_fieldRelativeOffset, m_modulePositions, update.get().estimatedPose.toPose2d());
-        }
+        m_odometry.resetPosition(new Rotation2d(0), m_modulePositions, new Pose2d(new Translation2d(0,0),new Rotation2d(0)));
     }
     public double getSpeakerXDistChange() {
         Pose2d speakerPose;
@@ -135,15 +142,17 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public double getCalculatedAngle() {
         return Constants.ShooterConstants.CalcShooterAngleFromDistance(GetDistanceToSpeaker())-.22;
     }
+    Field2d field = new Field2d();
     public void periodic() {
-        var update = vision.updatePoseEstimator(m_odometry.getEstimatedPosition());
+        var update = vision.updatePoseEstimatorNoPose(m_odometry.getEstimatedPosition());
         if (update.isPresent()) {
-            m_odometry.addVisionMeasurement(update.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
+          //  m_odometry.addVisionMeasurement(update.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
+            lastRobotPose = update;
         }
-        SmartDashboard.putNumber("calculated ", (Constants.ShooterConstants.CalcShooterAngleFromDistance(GetDistanceToSpeaker())));
-        SmartDashboard.putNumber("speaker dist ", GetDistanceToSpeaker());
-        SmartDashboard.putNumber("calculated angle", Math.asin(getSpeakerXDistChange()/GetDistanceToSpeaker()));
-
+        // SmartDashboard.putNumber("calculated ", (Constants.ShooterConstants.CalcShooterAngleFromDistance(GetDistanceToSpeaker())));
+        // SmartDashboard.putNumber("speaker dist ", GetDistanceToSpeaker());
+        // SmartDashboard.putNumber("calculated turn angle", Math.asin(getSpeakerXDistChange()/GetDistanceToSpeaker()));
+        SmartDashboard.putData(field);
     }
 
 }
