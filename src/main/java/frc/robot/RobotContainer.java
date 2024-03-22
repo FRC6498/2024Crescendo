@@ -62,7 +62,7 @@ public class RobotContainer {
     armSub = new Arm();
     NamedCommands.registerCommand("ShootSpeakerCommand", ShootSpeakerClose());
     NamedCommands.registerCommand("IntakeCommand", intakeToArmAuto());
-    NamedCommands.registerCommand("ShootSpeakerDistance", ShootSpeakerMid());
+    NamedCommands.registerCommand("ShootSpeakerDistance", ShootSpeakerDistance());
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
     ledSub.setDefaultCommand(ledSub.StartLeds());
@@ -160,12 +160,10 @@ public class RobotContainer {
     .andThen(Commands.runOnce(()->{armSub.setGoal(0); armSub.enable();}, armSub));
   }
     private Command ShootSpeakerClose() {
-    return
-    Commands.runOnce(()->{armSub.setGoal(0.03); armSub.enable();}, armSub)
-    .andThen(intakeSub.IntakeMain())
+    return intakeSub.IntakeMain()
     .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
     .andThen(shooterSub.RunAtVelocity(130))
-    .andThen(new WaitCommand(1.5))
+    .andThen(new WaitCommand(2))
     .andThen(intakeSub.IntakeArm())
     .andThen(new WaitCommand(.5))
     .andThen(intakeSub.StopArmIntake())
@@ -175,7 +173,7 @@ public class RobotContainer {
   }
    private Command ShootSpeakerMid() {
     return
-    Commands.runOnce(()->{armSub.setGoal(0.095); armSub.enable();}, armSub)
+    Commands.runOnce(()->{armSub.setGoal(0.065); armSub.enable();}, armSub)
     .andThen(intakeSub.IntakeMain())
     .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
     .andThen(shooterSub.RunAtVelocity(130))
@@ -190,7 +188,7 @@ public class RobotContainer {
   
   private Command ShootAmp() {
     return intakeSub.IntakeMain().andThen(
-    Commands.runOnce(()->{armSub.setGoal(0.25); armSub.enable();}, armSub))
+    Commands.runOnce(()->{armSub.setGoal(0.22); armSub.enable();}, armSub))
     .andThen(shooterSub.RunAtVelocity(40).until(()-> Math.abs(10 - shooterSub.GetShooterAverageRpm()) < 10))
     .andThen(shooterSub.RunAtVelocity(40))
     .andThen(new WaitCommand(1.2))
