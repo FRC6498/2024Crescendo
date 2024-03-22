@@ -11,6 +11,8 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
@@ -52,7 +54,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         if (Utils.isSimulation()) {
             startSimThread();
         }
-        // resetPose();
     }
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
@@ -98,7 +99,13 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                                             TunerConstants.kSpeedAt12VoltsMps,
                                             driveBaseRadius,
                                             new ReplanningConfig()),
-            ()->false, // Change this if the path needs to be flipped on red vs blue
+            ()->{
+                var alliance = DriverStation.getAlliance();
+                if (alliance.isPresent()) {
+                    return alliance.get() == DriverStation.Alliance.Red;
+                }
+                return false;
+            }, // Change this if the path needs to be flipped on red vs blue
             this); // Subsystem for requirements
     }
     public ChassisSpeeds getCurrentRobotChassisSpeeds() {
@@ -107,12 +114,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public double GetDistanceToSpeaker() {
         // dist from robot pose to speaker pose
         double distance = 0;
-        if (lastRobotPose.isPresent()) {
-             if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
-                distance = lastRobotPose.get().estimatedPose.toPose2d().getTranslation().getDistance(Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.BLUE_SPEAKER_TAG_ID).get().toPose2d().getTranslation());
-            }else {
-                distance = lastRobotPose.get().estimatedPose.toPose2d().getTranslation().getDistance(Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.RED_SPEAKER_TAG_ID).get().toPose2d().getTranslation());
-            }
+        if (DriverStation.getAlliance().get() == DriverStation.Alliance.Blue) {
+            distance = m_odometry.getEstimatedPosition().getTranslation().getDistance(Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.BLUE_SPEAKER_TAG_ID).get().toPose2d().getTranslation());
+        }else {
+            distance = m_odometry.getEstimatedPosition().getTranslation().getDistance(Constants.FieldConstants.FIELD_LAYOUT.getTagPose(Constants.FieldConstants.RED_SPEAKER_TAG_ID).get().toPose2d().getTranslation());
         }
         return distance;
        
@@ -146,12 +151,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public void periodic() {
         var update = vision.updatePoseEstimatorNoPose(m_odometry.getEstimatedPosition());
         if (update.isPresent()) {
-          //  m_odometry.addVisionMeasurement(update.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
+           m_odometry.addVisionMeasurement(update.get().estimatedPose.toPose2d(), vision.getCurrentTimeStamp());
             lastRobotPose = update;
         }
-        // SmartDashboard.putNumber("calculated ", (Constants.ShooterConstants.CalcShooterAngleFromDistance(GetDistanceToSpeaker())));
-        // SmartDashboard.putNumber("speaker dist ", GetDistanceToSpeaker());
-        // SmartDashboard.putNumber("calculated turn angle", Math.asin(getSpeakerXDistChange()/GetDistanceToSpeaker()));
+        SmartDashboard.putNumber("calculated ", (Constants.ShooterConstants.CalcShooterAngleFromDistance(GetDistanceToSpeaker())));
+        SmartDashboard.putNumber("speaker dist ", GetDistanceToSpeaker());
+        SmartDashboard.putNumber("calculated turn angle", Math.asin(getSpeakerXDistChange()/GetDistanceToSpeaker()));
         SmartDashboard.putData(field);
     }
 

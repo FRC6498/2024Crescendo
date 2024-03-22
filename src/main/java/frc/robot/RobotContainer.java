@@ -19,8 +19,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.generated.TunerConstants;
 
 public class RobotContainer {
-  private double MaxSpeed = 6;
-  private double MaxAngularRate = 1.5 * Math.PI;
+  private double MaxSpeed = 10;
+  private double MaxAngularRate = 2.5 * Math.PI;
   private final SendableChooser<Command> autoChooser;
   private final CommandXboxController driverController, operatorController;
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain;
@@ -44,7 +44,7 @@ public class RobotContainer {
     .withRotationalDeadband(MaxAngularRate * 0.1)
     .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 //#endregion
-  private final Telemetry logger;
+ // private final Telemetry logger;
   private final Intake intakeSub;
   private final Climber climber;
   private final Shooter shooterSub;
@@ -54,7 +54,7 @@ public class RobotContainer {
    
     driverController = new CommandXboxController(0);
     operatorController = new CommandXboxController(1);
-    logger = new Telemetry(MaxSpeed);
+    //logger = new Telemetry(MaxSpeed);
     intakeSub = new Intake();
     climber = new Climber();
     shooterSub = new Shooter();
@@ -62,6 +62,7 @@ public class RobotContainer {
     armSub = new Arm();
     NamedCommands.registerCommand("ShootSpeakerCommand", ShootSpeakerClose());
     NamedCommands.registerCommand("IntakeCommand", intakeToArmAuto());
+    NamedCommands.registerCommand("ShootSpeakerDistance", ShootSpeakerMid());
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
     ledSub.setDefaultCommand(ledSub.StartLeds());
@@ -73,8 +74,8 @@ public class RobotContainer {
     //* drive fieldcentric by default */
     drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
         drivetrain.applyRequest(() -> FieldCentricDrive
-          .withVelocityX(-driverController.getLeftY() * MaxSpeed)
-          .withVelocityY(-driverController.getLeftX() * MaxSpeed)
+          .withVelocityX(driverController.getLeftY() * MaxSpeed)
+          .withVelocityY(driverController.getLeftX() * MaxSpeed)
           .withRotationalRate(-driverController.getRightX() * MaxAngularRate)
         ));
     //* brake the drive motors */
@@ -117,7 +118,7 @@ public class RobotContainer {
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
-    drivetrain.registerTelemetry(logger::telemeterize);
+    //drivetrain.registerTelemetry(logger::telemeterize);
   }
   private Command intakeToArmAuto() {
       return intakeSub.RunIntakes().until(()->intakeSub.intakeHasNote)
@@ -166,7 +167,21 @@ public class RobotContainer {
     .andThen(shooterSub.RunAtVelocity(130))
     .andThen(new WaitCommand(1.5))
     .andThen(intakeSub.IntakeArm())
-    .andThen(new WaitCommand(0.75))
+    .andThen(new WaitCommand(.5))
+    .andThen(intakeSub.StopArmIntake())
+    .andThen(intakeSub.stop())
+    .andThen(shooterSub.stop())
+    .andThen(Commands.runOnce(()->{armSub.setGoal(0); armSub.enable();}, armSub));
+  }
+   private Command ShootSpeakerMid() {
+    return
+    Commands.runOnce(()->{armSub.setGoal(0.095); armSub.enable();}, armSub)
+    .andThen(intakeSub.IntakeMain())
+    .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
+    .andThen(shooterSub.RunAtVelocity(130))
+    .andThen(new WaitCommand(1.5))
+    .andThen(intakeSub.IntakeArm())
+    .andThen(new WaitCommand(0.5))
     .andThen(intakeSub.StopArmIntake())
     .andThen(intakeSub.stop())
     .andThen(shooterSub.stop())

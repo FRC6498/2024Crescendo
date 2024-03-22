@@ -4,13 +4,15 @@
   "holonomicMode": true,
   "pathFolders": [
     "MidRingToStart",
+    "New Folder",
     "Ring1ToStart",
     "StartToMidRing",
-    "StartToRing1"
+    "StartToMidToStart"
   ],
   "autoFolders": [
     "2 Ring Autos",
-    "3 Ring Autos"
+    "3 Ring Autos",
+    "New Folder"
   ],
   "defaultMaxVel": 3.0,
   "defaultMaxAccel": 3.0,

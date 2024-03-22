@@ -1,0 +1,37 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 0.7343180058169219,
+      "y": 6.683940204728357
+    },
+    "rotation": 59.65675111576053
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootSpeakerCommand"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "StartToLeft"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootSpeakerDistance"
+          }
+        }
+      ]
+    }
+  },
+  "folder": "New Folder",
+  "choreoAuto": false
+}
