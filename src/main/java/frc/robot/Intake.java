@@ -20,7 +20,7 @@ public class Intake extends SubsystemBase {
   public Trigger mainIntakeHasNote, armIntakeHasNote;
   public boolean intakeHasNote = false;
   public Intake() {
-    MainIntakeMotor = new TalonFX(10);
+    MainIntakeMotor = new TalonFX(55);
     ArmIntakeMotor = new CANSparkMax(18, MotorType.kBrushless);
     ArmIntakeSensor = new DigitalInput(1);
     MainIntakeMotor.setInverted(false);
@@ -39,7 +39,7 @@ public class Intake extends SubsystemBase {
 
   }
   public Command IntakeArm() {
-    return this.run(()-> ArmIntakeMotor.set(0.3)).until(armIntakeHasNote);
+    return this.run(()-> ArmIntakeMotor.set(0.7)).until(armIntakeHasNote);
   }
   public Command StopArmIntake() {
     return this.runOnce(()-> ArmIntakeMotor.set(0));

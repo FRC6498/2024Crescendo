@@ -81,16 +81,14 @@ public class RobotContainer {
     //* brake the drive motors */
     driverController.rightBumper().whileTrue(drivetrain.applyRequest(() -> brake));
     //* go back to field centric drive */
-    driverController.x().whileTrue(drivetrain.run(()->
-      drivetrain.applyRequest(
+    driverController.x().onTrue(
+        drivetrain.applyRequest(
           () -> FieldCentricDrive
-          .withVelocityX(driverController.getLeftY() * MaxSpeed)
-          .withVelocityY(driverController.getLeftX() * MaxSpeed)
+          .withVelocityX(-driverController.getLeftY() * MaxSpeed)
+          .withVelocityY(-driverController.getLeftX() * MaxSpeed)
           .withRotationalRate(-driverController.getRightX() * MaxAngularRate)
-          )
         )
       );
-    driverController.a().onTrue(Commands.runOnce(()->drivetrain.resetPose(), drivetrain));
     driverController.y().onTrue(drivetrain.applyRequest(() -> FieldCentricDrive
           .withVelocityX(driverController.getLeftY() * MaxSpeed)
           .withVelocityY(driverController.getLeftX() * MaxSpeed)
@@ -111,6 +109,7 @@ public class RobotContainer {
       //operator dpad up reverses the main intake
     operatorController.pov(0).onTrue(ReverseAllIntakes()).onFalse(intakeSub.StopIntakes());
 
+    operatorController.pov(90).onTrue(PassShot());
     // operatorController.pov(90).onTrue(Commands.runOnce(()->{drivetrain.resetPose();}, drivetrain));
       //operator dpad down moves the arm down
     operatorController.pov(180).onTrue(resetArm());
@@ -149,9 +148,8 @@ public class RobotContainer {
     return
     intakeSub.IntakeMain().andThen(
     Commands.runOnce(()->{armSub.setGoal(Constants.ShooterConstants.CalcShooterAngleFromDistance(drivetrain.GetDistanceToSpeaker())); armSub.enable();}, armSub))
-    .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
     .andThen(shooterSub.RunAtVelocity(130))
-    .andThen(new WaitCommand(1.5))
+    .andThen(new WaitCommand(0.5))
     .andThen(intakeSub.IntakeArm())
     .andThen(new WaitCommand(0.75))
     .andThen(intakeSub.StopArmIntake())
@@ -161,9 +159,8 @@ public class RobotContainer {
   }
     private Command ShootSpeakerClose() {
     return intakeSub.IntakeMain()
-    .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
     .andThen(shooterSub.RunAtVelocity(130))
-    .andThen(new WaitCommand(2))
+    .andThen(new WaitCommand(0.5))
     .andThen(intakeSub.IntakeArm())
     .andThen(new WaitCommand(.5))
     .andThen(intakeSub.StopArmIntake())
@@ -171,13 +168,12 @@ public class RobotContainer {
     .andThen(shooterSub.stop())
     .andThen(Commands.runOnce(()->{armSub.setGoal(0); armSub.enable();}, armSub));
   }
-   private Command ShootSpeakerMid() {
+   private Command PassShot() {
     return
     Commands.runOnce(()->{armSub.setGoal(0.065); armSub.enable();}, armSub)
     .andThen(intakeSub.IntakeMain())
-    .andThen(shooterSub.RunAtVelocity(130).until(()-> Math.abs(130 - shooterSub.GetShooterAverageRpm()) < 10))
-    .andThen(shooterSub.RunAtVelocity(130))
-    .andThen(new WaitCommand(1.5))
+    .andThen(shooterSub.RunAtVelocity(70))
+    .andThen(new WaitCommand(0.5))
     .andThen(intakeSub.IntakeArm())
     .andThen(new WaitCommand(0.5))
     .andThen(intakeSub.StopArmIntake())
@@ -189,9 +185,8 @@ public class RobotContainer {
   private Command ShootAmp() {
     return intakeSub.IntakeMain().andThen(
     Commands.runOnce(()->{armSub.setGoal(0.22); armSub.enable();}, armSub))
-    .andThen(shooterSub.RunAtVelocity(40).until(()-> Math.abs(10 - shooterSub.GetShooterAverageRpm()) < 10))
     .andThen(shooterSub.RunAtVelocity(40))
-    .andThen(new WaitCommand(1.2))
+    .andThen(new WaitCommand(0.75))
     .andThen(intakeSub.IntakeArm())
     .andThen(new WaitCommand(0.75))
     .andThen(intakeSub.StopArmIntake())
