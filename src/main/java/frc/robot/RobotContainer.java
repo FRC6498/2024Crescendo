@@ -20,7 +20,7 @@ import frc.robot.generated.TunerConstants;
 
 public class RobotContainer {
   private double MaxSpeed = 10;
-  private double MaxAngularRate = 2.5 * Math.PI;
+  private double MaxAngularRate = 8.6* Math.PI;
   private final SendableChooser<Command> autoChooser;
   private final CommandXboxController driverController, operatorController;
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.DriveTrain;

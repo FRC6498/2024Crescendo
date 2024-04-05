@@ -20,6 +20,18 @@
         {
           "type": "path",
           "data": {
+            "pathName": "New Path"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ShootSpeakerCommand"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
             "pathName": "MidToRingBehind"
           }
         },
@@ -40,16 +52,10 @@
           "data": {
             "name": "ShootSpeakerDistance"
           }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "2ndFarMidRingToMidStart"
-          }
         }
       ]
     }
   },
-  "folder": "3 Ring Autos",
+  "folder": null,
   "choreoAuto": false
 }
