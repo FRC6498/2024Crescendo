@@ -186,7 +186,7 @@ public class RobotContainer {
     return intakeSub.IntakeMain().andThen(
     Commands.runOnce(()->{armSub.setGoal(0.22); armSub.enable();}, armSub))
     .andThen(shooterSub.RunAtVelocity(40))
-    .andThen(new WaitCommand(0.75))
+    .andThen(new WaitCommand(1))
     .andThen(intakeSub.IntakeArm())
     .andThen(new WaitCommand(0.75))
     .andThen(intakeSub.StopArmIntake())
