@@ -4,7 +4,6 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.ForwardLimitValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -12,8 +11,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class Climber extends SubsystemBase {
-  DigitalInput climberLowSensor; // Declare sensor that detects when the climber gets to low 
-  Trigger climberHigh  = new Trigger(()->!climberLowSensor.get() /* sensor is inverted */); // Trigger that updates when the climber gets to low  
+  DigitalInput climberLowSensor; // Declare sensor that detects when the climber gets to low
+  Trigger climberHigh  = new Trigger(()->!climberLowSensor.get() /* sensor is inverted */); // Trigger that updates when the climber gets to low
 
   private final TalonFX RightClimberMotor;
 

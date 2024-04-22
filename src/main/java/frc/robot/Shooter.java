@@ -25,14 +25,19 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import static frc.robot.Constants.ShooterConstants.*;
 
 public class Shooter extends SubsystemBase {
-  /** Creates a new Shooter. */
+  // shooter motors
   private CANSparkMax topMotor, bottomMotor;
+  // pid controllers for each of the shooter motors
   private SparkPIDController topPID, bottomPID;
-  //private double topMotorCurrentVelocity, bottomMotorCurrentVelocity;
+  // voltage applied to the motors (for sysid)
   private final MutableMeasure<Voltage> appliedTopVoltage, appliedBottomVoltage;
+  // angle of the motors (position)(for sysid)
   private final MutableMeasure<Angle> topDistance, bottomDistance;
+  // velocity of the motors (for sysid)
   private final MutableMeasure<Velocity<Angle>> topVelocity, bottomVelocity;
+  // create a new sysid routine
   public final SysIdRoutine routine;
+  // feedforward for the shooter motors
   SimpleMotorFeedforward topFF, bottomFF;
 
   public Shooter() {
@@ -44,8 +49,11 @@ public class Shooter extends SubsystemBase {
     bottomMotor.getEncoder().setPosition(0);
     topMotor.setIdleMode(IdleMode.kCoast);
     bottomMotor.setIdleMode(IdleMode.kCoast);
+    // make the motors generate a pid controller for themselves
     topPID = topMotor.getPIDController();
     bottomPID = bottomMotor.getPIDController();
+
+    // Configure motor pid and feedforward
     bottomPID.setP(TOP_MOTOR_KP);
     bottomPID.setI(TOP_MOTOR_KI);
     bottomPID.setD(TOP_MOTOR_KD);
@@ -57,6 +65,7 @@ public class Shooter extends SubsystemBase {
     bottomPID.setFF(0.00015);
     topFF = new SimpleMotorFeedforward(BOTTOM_MOTOR_KS, BOTTOM_MOTOR_KV, BOTTOM_MOTOR_KA);
 //#region sysid setup
+    //read the wpilib docs on sysid for explanation
     appliedTopVoltage = mutable(Volts.of(0));
     topDistance = mutable(Rotations.of(0));
     topVelocity = mutable(RPM.of(0));
@@ -84,39 +93,48 @@ public class Shooter extends SubsystemBase {
             }, this));
 //#endregion
   }
+  /** Runs both shooter motors at different speeds */
   public Command RunAtVelocity(double topMotorVelocity, double bottomMotorVelocity) {
         return this.runOnce(() -> topPID.setReference(topMotorVelocity, ControlType.kVelocity, 0, topFF.calculate(topMotorVelocity)))
         .andThen(
             this.run(
                 () -> bottomPID.setReference(bottomMotorVelocity, ControlType.kVelocity, 0, bottomFF.calculate(bottomMotorVelocity))));
   }
+  /** Runs both shooter motors at the same speed */
   public Command RunAtVelocity(double velocity) {
     return this.runOnce(() -> topPID.setReference(velocity, ControlType.kVelocity, 0, topFF.calculate(velocity)))
         .andThen(
             this.runOnce(
                 () -> bottomPID.setReference(velocity, ControlType.kVelocity, 0, bottomFF.calculate(velocity))));
   }
+  /** runs both shooter motors off of precent output */
   public Command Run() {
     return this.runOnce(() -> topMotor.set(DEFAULT_SHOOTER_SPEED)).andThen(() -> bottomMotor.set(DEFAULT_SHOOTER_SPEED));
   }
+  /** stops both shooter motors */
   public Command stop() {
     return this.runOnce(() -> topMotor.set(0)).andThen(() -> bottomMotor.set(0));
   }
   public double GetShooterAverageRpm() {
-    return (topMotor.getEncoder().getVelocity() + bottomMotor.getEncoder().getVelocity()) / 2;
+    return (topMotor.getEncoder().getVelocity() + bottomMotor.getEncoder().getVelocity()) / 2; // average the encoder velocitys
   }
+  /** runs the first sysid test */
   public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    //reset the encoders to improve data
     topMotor.getEncoder().setPosition(0);
     bottomMotor.getEncoder().setPosition(0);
+    // run the test
     return routine.quasistatic(direction);
   }
+  /** runs the second sysid test */
   public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    // reset the enocders to improve data
     topMotor.getEncoder().setPosition(0);
     bottomMotor.getEncoder().setPosition(0);
+    // run the test
     return routine.dynamic(direction);
   }
   @Override
   public void periodic() {
-
   }
 }

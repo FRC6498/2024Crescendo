@@ -1,9 +1,6 @@
 package frc.robot;
 
 import java.util.Optional;
-
-import javax.swing.text.html.Option;
-
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -18,22 +15,24 @@ import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 
 public class Vision extends SubsystemBase {
-  /** Creates a new Vision. */
+  //main robot camera
   private final PhotonCamera mainCam;
+  // result data for the main camera
   public PhotonPipelineResult pipelineResult;
+  // Pose estimator based only on data from the vision cameras
   private final PhotonPoseEstimator visionPoseEstimator;
   public Optional<EstimatedRobotPose> currentEstimatedPose;
   public double lastTimestamp = 0;
-  
+
   public boolean isBlueAlliance;
   public Vision() {
     mainCam = new PhotonCamera("mainCamera");
-    visionPoseEstimator = new PhotonPoseEstimator(FieldConstants.FIELD_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, mainCam,  VisionConstants.ROBOT_TO_CAMERA); 
+    visionPoseEstimator = new PhotonPoseEstimator(FieldConstants.FIELD_LAYOUT, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, mainCam,  VisionConstants.ROBOT_TO_CAMERA);
     visionPoseEstimator.setMultiTagFallbackStrategy(PoseStrategy.LOWEST_AMBIGUITY);
   }
   public Transform3d GetRobotToTagTransform(int tagId, Pose3d currentRobotPose) {
     return FieldConstants.FIELD_LAYOUT.getTagPose(tagId).get().minus(currentRobotPose);
-  }  
+  }
   public Optional<EstimatedRobotPose> updatePoseEstimator(){
     return visionPoseEstimator.update();
   }

@@ -11,14 +11,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.IntakeConstants;
 
 public class Intake extends SubsystemBase {
   TalonFX MainIntakeMotor;
   CANSparkMax ArmIntakeMotor;
+  /** Sensor on the arm that detects when the robot has a note */
   DigitalInput ArmIntakeSensor;
-  public Trigger mainIntakeHasNote, armIntakeHasNote;
-  public boolean intakeHasNote = false;
+  /** Trigger that reads the value of the Intake sensor and flips when the senor detects a note */
+  public Trigger armIntakeHasNote;
   public Intake() {
     MainIntakeMotor = new TalonFX(55);
     ArmIntakeMotor = new CANSparkMax(18, MotorType.kBrushless);
@@ -45,16 +45,13 @@ public class Intake extends SubsystemBase {
     return this.runOnce(()-> ArmIntakeMotor.set(0));
   }
   public Command runAtPrecent(double percent) { return this.runOnce(()-> MainIntakeMotor.set(percent)); }
-  public Command Reverse() { return runAtPrecent(-IntakeConstants.DEFAULT_INTAKE_SPEED); }
+  public Command Reverse() { return runAtPrecent(-0.75); }
   public Command ReverseArmIntake() {return this.runOnce(()-> ArmIntakeMotor.set(-0.2));}
   public Command stop() { return runAtPrecent(0); }
-  public Boolean getIntakeSensor() {
-    return !ArmIntakeSensor.get();
-  }
-  
+
   @Override
   public void periodic() {
-    intakeHasNote = !ArmIntakeSensor.get();
-    SmartDashboard.putBoolean("intake sensor", intakeHasNote);
+    // logging
+    SmartDashboard.putBoolean("intake sensor", armIntakeHasNote.getAsBoolean());
   }
 }
